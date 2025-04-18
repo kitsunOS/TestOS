@@ -1,11 +1,13 @@
-ASM = nasm
-ASMFLAGS = -f elf32
-
 TARGET_ARCH := i386
-LAYOUT_DIR = layout/$(TARGET_ARCH)
-SRC_DIR = arch/$(TARGET_ARCH)
 OUT_DIR = out
 OBJ_DIR = build
+LAYOUT_SRC_DIR = layout/$(TARGET_ARCH)
+LAYOUT_DEST_DIR = $(OBJ_DIR)/layout
+
+LAYOUT_FILES := $(shell find $(LAYOUT_SRC_DIR) -type f)
+TARGET_FILES := $(shell find arch/$(TARGET_ARCH) -type f)
+
+LAYOUT_DEPS := $(LAYOUT_FILES) $(OBJ_DIR)/kernel.bin 
 
 .PHONY: all clean run
 
@@ -17,19 +19,22 @@ run: all
 clean:
 	rm -rf $(OBJ_DIR) $(OUT_DIR)
 
-$(OUT_DIR)/testos.iso: $(OBJ_DIR)/layout
-	@mkdir -p $(dir $@)
-	grub-mkrescue -o $@ $<
+$(OUT_DIR):
+	@mkdir -p $(OUT_DIR)
 
-$(OBJ_DIR)/layout: $(OBJ_DIR)/kernel.bin
-	rm -rf $@
-	cp $(LAYOUT_DIR) $@ -r
-	cp $< $@/boot/testos.bin
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
+
+$(OUT_DIR)/testos.iso: $(LAYOUT_DEPS) $(LAYOUT_DEST_DIR) | $(OUT_DIR)
+	grub-mkrescue -o $@ $(LAYOUT_DEST_DIR)
+
+$(LAYOUT_DEST_DIR): $(LAYOUT_DEPS) | $(OBJ_DIR)
+	mkdir -p $(LAYOUT_DEST_DIR)
+	rsync -a $(LAYOUT_SRC_DIR)/ $@
+	cp $(OBJ_DIR)/kernel.bin $@/boot/testos.bin
 
 $(OBJ_DIR)/kernel.bin: $(OBJ_DIR)/boot.o
-	@mkdir -p $(dir $@)
-	ld -m elf_$(TARGET_ARCH) -o $@ $<
+	ld -m elf_$(TARGET_ARCH) -T linker.ld -o $@ $<
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.asm
-	@mkdir -p $(dir $@)
-	$(ASM) $(ASMFLAGS) $< -o $@ -I $(dir $<)
+$(OBJ_DIR)/boot.o: $(TARGET_FILES) | $(OBJ_DIR)
+	$(MAKE) ${MFLAGS} -C arch/$(TARGET_ARCH) $(abspath $@) OBJ_DIR=$(abspath $(OBJ_DIR)) TARGET_ARCH=$(TARGET_ARCH)

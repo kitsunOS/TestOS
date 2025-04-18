@@ -1,23 +1,19 @@
 %include "multiboot.inc"
 
-%define FB_ADDR 0xB8000
-
 section .text:
 global _start
 _start:
-  mov eax, 0xB8000
+  mov edi, 0xB8000
   mov ebx, [boot_msg]
-  mov ecx, boot_msg + 4
+  mov esi, boot_msg + 4
 
 print_loop:
   cmp ebx, 0
   je done
-  mov edx, [ecx]
-  mov [eax], edx
-  mov byte [eax + 1], 0x07
-  add eax, 2
+  lodsb
+  mov ah, 0x07
+  stosw
   dec ebx
-  add ecx, 1
   jmp print_loop
 
 done:
