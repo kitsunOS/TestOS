@@ -1,6 +1,8 @@
 %include "multiboot.inc"
 
-section .text:
+extern rellocate
+
+section .text
 global _start
 _start:
   mov edi, 0xB8000
@@ -17,10 +19,9 @@ print_loop:
   jmp print_loop
 
 done:
-  hlt
-  jmp $
+  jmp rellocate
 
 .data:
 boot_msg:
-  dd 13
-  db "Hello, World!"
+  dd 6
+  db "TestOS"

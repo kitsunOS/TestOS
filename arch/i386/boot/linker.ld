@@ -1,17 +1,15 @@
 SECTIONS {
-  .text.multiboot ALIGN(8) : {
+  .text.boot ALIGN(8) : {
     *(.text.multiboot)
-  }
-  .text : {
     *(.text)
   }
-  .rodata : {
+  .rodata.boot : {
     *(.rodata)
   }
-  .data : {
+  .data.boot : {
     *(.data)
   }
-  .bss : {
+  .bss.boot : {
     *(.bss)
   }
 }
