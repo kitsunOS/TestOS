@@ -1,6 +1,11 @@
 BOOT_OBJ_DIR = $(ARCH_OBJ_DIR)/boot
 
-OBJECTS_TO_LINK = $(BOOT_OBJ_DIR)/boot.o $(BOOT_OBJ_DIR)/relloc.o $(BOOT_OBJ_DIR)/rellocc.o
+ASM_SOURCES = boot.asm relloc.asm
+C_SOURCES = rellocc.c
+
+OBJECTS_TO_LINK = \
+  $(patsubst %.asm,$(BOOT_OBJ_DIR)/%.o,$(ASM_SOURCES)) \
+  $(patsubst %.c,$(BOOT_OBJ_DIR)/%.o,$(C_SOURCES))
 
 $(BOOT_OBJ_DIR)/boot_linked.o: $(OBJECTS_TO_LINK) linker.ld
 	$(LD) -r -m elf_$(TARGET_ARCH) -T linker.ld -o $@ $(OBJECTS_TO_LINK)

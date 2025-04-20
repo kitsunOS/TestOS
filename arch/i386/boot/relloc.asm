@@ -1,11 +1,12 @@
-extern init_identity_paging
+extern setup_init_page_map
 extern page_directory
+extern higher_half_entry
 
 section .text
 global rellocate
 
 rellocate:
-  call init_identity_paging
+  call setup_init_page_map
 
   mov eax, page_directory
   and eax, 0xFFFFF000
@@ -21,6 +22,9 @@ rellocate:
 
   mov cl, 'P'
   mov [0xB8000], cl
+
+  jmp higher_half_entry
+
   hlt
   jmp $
   

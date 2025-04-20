@@ -3,7 +3,7 @@
 %define MB_LENGTH (header_end - header_start)
 %define MB_CHECKSUM (0 - MB_MAGIC - MB_ARCH - MB_LENGTH)
 
-section .text.multiboot align=8:
+section .text.multiboot
 header_start:
 
 dd MB_MAGIC

@@ -1,5 +1,5 @@
-#ifndef __PAGES_H__
-#define __PAGES_H__
+#ifndef __I386_PAGES_H__
+#define __I386_PAGES_H__
 
 #include <types.h>
 

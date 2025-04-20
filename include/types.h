@@ -13,4 +13,14 @@ typedef signed int sX;
 
 typedef u8 bool;
 
+typedef struct {
+  u32 size;
+  const u8* data;
+} string_t;
+
+#define S(x) ((string_t){sizeof(x), x})
+
+#define true 1
+#define false 0
+
 #endif
