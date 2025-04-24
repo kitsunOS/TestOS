@@ -5,7 +5,7 @@ extern rellocate
 section .text
 global _start
 _start:
-  mov esp, stack_start
+  mov esp, boot_stack_start
   cmp eax, 0x36d76289
   jne print_mb2_issue
   mov [_multiboot2_info], ebx
@@ -36,9 +36,9 @@ mb2_issue_msg:
 
 section .bss
 global _multiboot2_info
-stack_end:
+boot_stack_end:
   resb 0x1000
-stack_start:
+boot_stack_start:
 
 _multiboot2_info:
   resd 1

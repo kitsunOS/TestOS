@@ -24,6 +24,10 @@ void early_print_set_color(u8 fg, u8 bg) {
   color = (bg << 4) | (fg & 0x0F);
 }
 
+void early_print_reset_color() {
+  color = 0x07;
+}
+
 void early_print_finish() {
   if (xPos != 0) {
     next_line();

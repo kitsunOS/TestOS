@@ -19,7 +19,7 @@ bool st_assert_equals_vptr(vptr expected, vptr actual, string_t failMessage, str
     early_print(S(", Actual: "));
     early_print_addr(actual);
     early_println(S(")"));
-    early_print_set_color(EP_WHITE, EP_BLACK);
+    early_print_reset_color();
     return true;
   }
 
@@ -29,6 +29,6 @@ bool st_assert_equals_vptr(vptr expected, vptr actual, string_t failMessage, str
   early_print_set_color(EP_GREEN, EP_BLACK);
   early_print(S("ST: "));
   early_println(pass_message);
-  early_print_set_color(EP_WHITE, EP_BLACK);
+  early_print_reset_color();
   return false;
 }

@@ -21,14 +21,12 @@ typedef struct __attribute__((packed)) {
 } multiboot2_memory_map_tag_t;
 
 typedef struct __attribute__((packed)) {
-    u32 type;
-    u32 size;
-    u32 entry_size;
-    u32 entry_version;
     u32 base_addr_low;
     u32 base_addr_high;
     u32 length_low;
     u32 length_high;
+    u32 type;
+    u32 reserved;
 } multiboot2_memory_map_entry_t;
 
 #endif

@@ -23,6 +23,7 @@ SECTIONS {
 
   . = KERNEL_ADDRESS;
   __phys_kernel_start = __boot_end;
+  __virt_kernel_start = KERNEL_ADDRESS;
   .text : AT(__boot_end) {
     *(.text)
   }
@@ -31,10 +32,12 @@ SECTIONS {
   }
   .data : AT(__boot_end + ADDR(.data) - KERNEL_ADDRESS) {
     *(.data)
+    *(COMMON)
   }
   .bss : AT(__boot_end + ADDR(.bss) - KERNEL_ADDRESS) {
     *(.bss)
   }
+  __virt_kernel_end = .;
   __phys_kernel_end = __boot_end + . - KERNEL_ADDRESS;
 
 }

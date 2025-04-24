@@ -3,7 +3,7 @@ ASMFLAGS = -f elf32
 
 ARCH_OBJ_DIR = $(OBJ_DIR)/arch/$(TARGET_ARCH)
 
-C_SOURCES = early_print.c hentry.c pagestrap.c mb2_mm.c
+C_SOURCES = early_print.c hentry.c pagestrap.c mb2_mm.c page_alloc.c
 
 ifeq ($(DEBUG),1)
 C_SOURCES += self_tests.c pagestrap_tests.c

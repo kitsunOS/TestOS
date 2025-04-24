@@ -6,7 +6,7 @@
 
 static vptr allocate_page(pagestrap_t* pagestrap, uX num_subsequent);
 static pageref_t* obtain_pageref(pagestrap_t* pagestrap);
-static vptr pageref_end(pagestrap_t* pagestrap, pageref_t* page_ref);
+static uX pageref_end(pagestrap_t* pagestrap, pageref_t* page_ref);
 
 void pagestrap_init(pagestrap_t* pagestrap, pagestrap_alloc_t* first_alloc, vptr (*os_allocate_page) (void)) {
   pagestrap->next_alloc = first_alloc;
@@ -15,32 +15,32 @@ void pagestrap_init(pagestrap_t* pagestrap, pagestrap_alloc_t* first_alloc, vptr
   pagestrap->is_mid_alloc = false;
   pagestrap->os_allocate_page = os_allocate_page;
   pagestrap->available_pages_root.num_subsequent = 0;
-  pagestrap->available_pages_root.phys_ref = null;
+  pagestrap->available_pages_root.page_addr = 0;
   pagestrap->available_pages_root.next_page_ref = null;
   pagestrap->freelist_root.num_subsequent = 0;
-  pagestrap->freelist_root.phys_ref = null;
+  pagestrap->freelist_root.page_addr = 0;
   pagestrap->freelist_root.next_page_ref = null;
   pagestrap->used_page_refs_root.num_subsequent = 0;
-  pagestrap->used_page_refs_root.phys_ref = null;
+  pagestrap->used_page_refs_root.page_addr = 0;
   pagestrap->used_page_refs_root.next_page_ref = null;
 
   first_alloc->next_pointer = 0;
 }
 
-bool pagestrap_add_pages(pagestrap_t* pagestrap, vptr start_addr, uX num_subsequent) {
+bool pagestrap_add_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subsequent) {
   pageref_t* page_ref = obtain_pageref(pagestrap);
   if (page_ref == null) return true;
 
   pageref_t* prev_ref = &(pagestrap->available_pages_root);
   while (
     prev_ref->next_page_ref != null
-    && start_addr < prev_ref->next_page_ref->phys_ref
+    && start_addr < prev_ref->next_page_ref->page_addr
   ) {
     prev_ref = prev_ref->next_page_ref;
   }
 
   page_ref->num_subsequent = num_subsequent;
-  page_ref->phys_ref = start_addr;
+  page_ref->page_addr = start_addr;
   page_ref->next_page_ref = prev_ref->next_page_ref;
   prev_ref->next_page_ref = page_ref;
 
@@ -48,11 +48,13 @@ bool pagestrap_add_pages(pagestrap_t* pagestrap, vptr start_addr, uX num_subsequ
 }
 
 bool pagestrap_add_pages_se(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
-  return pagestrap_add_pages(pagestrap, start_addr, (end_addr - start_addr + _PS_PAGE_SIZE - 1) / _PS_PAGE_SIZE);
+  // TODO: What if they're not bounded perfectly
+  uX num_subsequent = ((uX) end_addr - (uX) start_addr) / _PS_PAGE_SIZE;
+  return pagestrap_add_pages(pagestrap, (uX) start_addr, num_subsequent);
 }
 
-bool pagestrap_remove_pages(pagestrap_t* pagestrap, vptr start_addr, uX num_subsequent) {
-  vptr end_addr = start_addr + num_subsequent * _PS_PAGE_SIZE;
+bool pagestrap_remove_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subsequent) {
+  uX end_addr = start_addr + num_subsequent * _PS_PAGE_SIZE;
   pageref_t* prev_ref = &(pagestrap->available_pages_root);
   pageref_t* page_ref = prev_ref->next_page_ref;
   while (page_ref != null && pageref_end(pagestrap, page_ref) <= start_addr) {
@@ -62,33 +64,33 @@ bool pagestrap_remove_pages(pagestrap_t* pagestrap, vptr start_addr, uX num_subs
 
   if (page_ref == null) return false;
   
-  while (page_ref != null && page_ref->phys_ref < end_addr) {
+  while (page_ref != null && page_ref->page_addr < end_addr) {
     pageref_t* next_ref = page_ref->next_page_ref;
-    vptr page_end = pageref_end(pagestrap, page_ref);
-    if (page_ref->phys_ref == start_addr && page_end <= end_addr) {
+    uX page_end = pageref_end(pagestrap, page_ref);
+    if (page_ref->page_addr == start_addr && page_end <= end_addr) {
       // All of pageref is consumed
       prev_ref->next_page_ref = page_ref->next_page_ref;
       page_ref->next_page_ref = pagestrap->freelist_root.next_page_ref;
       pagestrap->freelist_root.next_page_ref = page_ref;
-    } else if (page_ref->phys_ref == start_addr) {
+    } else if (page_ref->page_addr == start_addr) {
       // Head of pageref is consumed
       uX old_num_subsequent = page_ref->num_subsequent;
       page_ref->num_subsequent = (page_end - end_addr) / _PS_PAGE_SIZE;
-      page_ref->phys_ref += (old_num_subsequent - page_ref->num_subsequent) * _PS_PAGE_SIZE;
+      page_ref->page_addr += (old_num_subsequent - page_ref->num_subsequent) * _PS_PAGE_SIZE;
       prev_ref = page_ref;
     } else if (page_end <= end_addr) {
       // Tail of pageref is consumed
-      uX num_subsequent = (start_addr - page_ref->phys_ref) / _PS_PAGE_SIZE;
+      uX num_subsequent = (start_addr - page_ref->page_addr) / _PS_PAGE_SIZE;
       page_ref->num_subsequent = num_subsequent;
       prev_ref = page_ref;
     } else {
       // Subsection of pageref is consumed
       pageref_t* new_next_ref = obtain_pageref(pagestrap);
       if (new_next_ref == null) return true;
-      new_next_ref->phys_ref = end_addr;
+      new_next_ref->page_addr = end_addr;
       new_next_ref->num_subsequent = (page_end - end_addr) / _PS_PAGE_SIZE;
       new_next_ref->next_page_ref = next_ref;
-      page_ref->num_subsequent = (start_addr - page_ref->phys_ref) / _PS_PAGE_SIZE;
+      page_ref->num_subsequent = (start_addr - page_ref->page_addr) / _PS_PAGE_SIZE;
       page_ref->next_page_ref = new_next_ref;
       prev_ref = new_next_ref;
     }
@@ -102,7 +104,8 @@ bool pagestrap_remove_pages(pagestrap_t* pagestrap, vptr start_addr, uX num_subs
 }
 
 bool pagestrap_remove_pages_se(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
-  return pagestrap_remove_pages(pagestrap, start_addr, (end_addr - start_addr + _PS_PAGE_SIZE - 1) / _PS_PAGE_SIZE);
+  // TODO: What if they're not bounded perfectly
+  return pagestrap_remove_pages(pagestrap, (uX) start_addr, ((uX) end_addr - (uX) start_addr) / _PS_PAGE_SIZE);
 }
 
 vptr pagestrap_allocate_page(pagestrap_t* pagestrap, uX num_subsequent) {
@@ -119,7 +122,7 @@ vptr pagestrap_allocate_page(pagestrap_t* pagestrap, uX num_subsequent) {
     new_next_ref = obtain_pageref(pagestrap);
     if (new_next_ref == null) return null;
     new_next_ref->num_subsequent = page_ref->num_subsequent - num_subsequent;
-    new_next_ref->phys_ref = page_ref->phys_ref + num_subsequent * _PS_PAGE_SIZE;
+    new_next_ref->page_addr = page_ref->page_addr + num_subsequent * _PS_PAGE_SIZE;
     new_next_ref->next_page_ref = page_ref->next_page_ref;
     page_ref->num_subsequent = num_subsequent;
   } else {
@@ -130,7 +133,7 @@ vptr pagestrap_allocate_page(pagestrap_t* pagestrap, uX num_subsequent) {
   page_ref->next_page_ref = pagestrap->used_page_refs_root.next_page_ref;
   pagestrap->used_page_refs_root.next_page_ref = page_ref;
 
-  return page_ref->phys_ref;
+  return (vptr) page_ref->page_addr;
 }
 
 static bool refill_if_needed(pagestrap_t* pagestrap) {
@@ -163,6 +166,6 @@ static pageref_t* obtain_pageref(pagestrap_t* pagestrap) {
   return page_ref;
 }
 
-static vptr pageref_end(pagestrap_t* pagestrap, pageref_t* page_ref) {
-  return page_ref->phys_ref + page_ref->num_subsequent * _PS_PAGE_SIZE;
+static uX pageref_end(pagestrap_t* pagestrap, pageref_t* page_ref) {
+  return page_ref->page_addr + page_ref->num_subsequent * _PS_PAGE_SIZE;
 }

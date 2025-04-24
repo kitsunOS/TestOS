@@ -8,7 +8,7 @@
 
 typedef struct pageref_t {
   uX num_subsequent;
-  vptr phys_ref;
+  uX page_addr;
   struct pageref_t* next_page_ref;
 } pageref_t;
 
@@ -29,9 +29,9 @@ typedef struct pagestrap_t {
 
 void pagestrap_init(pagestrap_t* pagestrap, pagestrap_alloc_t* first_alloc, vptr (*os_allocate_page) (void));
 vptr pagestrap_allocate_page(pagestrap_t* pagestrap, uX num_subsequent);
-bool pagestrap_add_pages(pagestrap_t* pagestrap, vptr start_addr, uX num_subsequent);
+bool pagestrap_add_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subsequent);
 bool pagestrap_add_pages_se(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr);
-bool pagestrap_remove_pages(pagestrap_t* pagestrap, vptr start_addr, uX num_subsequent);
+bool pagestrap_remove_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subsequent);
 bool pagestrap_remove_pages_se(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr);
 
 #endif
