@@ -1,12 +1,12 @@
 #include <types.h>
 #include "../pages.h"
 
-extern void* KERNEL_ADDRESS;
-extern void* __phys_kernel_start;
-extern void* __phys_kernel_end;
+extern vptr KERNEL_ADDRESS;
+extern vptr __phys_kernel_start;
+extern vptr __phys_kernel_end;
 
-page_directory_entry_pte page_directory[1024] __attribute__((aligned(4096))) = {0};
-page_table_entry_fourkb page_table[1024 * 1024] __attribute__((aligned(4096))) = {0};
+page_directory_entry_pte_t page_directory[1024] __attribute__((aligned(4096))) = {0};
+page_table_entry_fourkb_t page_table[1024 * 1024] __attribute__((aligned(4096))) = {0};
 
 static void init_identity_paging();
 static void map_higher_half();

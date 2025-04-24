@@ -14,7 +14,7 @@ typedef struct __attribute__((packed)) {
   u32 is_large_page:1;
   u32 :4;
   u32 pte_reference:20;
-} page_directory_entry_pte;
+} page_directory_entry_pte_t;
 
 typedef struct __attribute__((packed)) {
   u32 in_memory:1;
@@ -28,6 +28,6 @@ typedef struct __attribute__((packed)) {
   u32 keep_tlb:1;
   u32 :3;
   u32 physical_reference:20;
-} page_table_entry_fourkb;
+} page_table_entry_fourkb_t;
 
 #endif

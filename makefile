@@ -10,16 +10,21 @@ CC = $(CC_PREFIX)gcc
 LD = $(CC_PREFIX)ld
 
 CFLAGS = -ffreestanding -fno-stack-protector -m32 -I$(INCLUDE_DIR) -g
+DEBUG_FLAGS = -O0 -DDEBUG
 
 LAYOUT_FILES := $(shell find $(LAYOUT_SRC_DIR) -type f)
 TARGET_FILES := $(shell find arch/$(TARGET_ARCH) -type f)
 
 LAYOUT_DEPS := $(LAYOUT_FILES) $(OBJ_DIR)/kernel.bin
 
+ifeq ($(DEBUG),1)
+CFLAGS += $(DEBUG_FLAGS)
+endif
+
 export TARGET_ARCH OBJ_DIR
 export CC CFLAGS LD
 
-.PHONY: all clean run FORCE
+.PHONY: all debug clean run FORCE
 
 all: $(OUT_DIR)/testos.iso
 

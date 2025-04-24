@@ -8,33 +8,71 @@ static u8 xPos = 0, yPos = 0;
 static u8 color = 0x07;
 
 static void scroll(int lines);
-static void nextLine();
-static void setCursor(u8 x, u8 y);
+static void next_line();
+static void set_cursor(u8 x, u8 y);
 static void outb(u16 port, u8 value);
+
+void early_print_init() {
+  xPos = 0, yPos = 0;
+  color = 0x07;
+  for (u16 i = 0; i < MAX_X * MAX_Y; i++) {
+    FRAMEBUFFER[i] = (color << 8) | ' ';
+  }
+}
+
+void early_print_set_color(u8 fg, u8 bg) {
+  color = (bg << 4) | (fg & 0x0F);
+}
+
+void early_print_finish() {
+  if (xPos != 0) {
+    next_line();
+  }
+
+  set_cursor(xPos, yPos);
+}
+
+void early_print_char(u8 c) {
+  if (c == '\n') {
+    next_line();
+  } else {
+    if (xPos >= MAX_X) {
+      next_line();
+    }
+    u16* cell = FRAMEBUFFER + ((yPos * MAX_X) + xPos);
+    *cell = (color << 8) | c;
+    xPos++;
+  }
+}
 
 void early_print(string_t str) {
   for (u32 i = 0; i < str.size; i++) {
-    u8 c = str.data[i];
-    if (c == '\n') {
-      nextLine();
-    } else {
-      if (xPos >= MAX_X) {
-        nextLine();
-      }
-      u16* cell = FRAMEBUFFER + ((yPos * MAX_X) + xPos);
-      *cell = (color << 8) | c;
-      xPos++;
-    }
+    early_print_char(str.data[i]);
   }
-
-  if (xPos != 0) {
-    nextLine();
-  }
-
-  setCursor(xPos, yPos);
 }
 
-static void nextLine() {
+void early_println(string_t str) {
+  early_print(str);
+  early_print_finish();
+}
+
+void early_print_hex_32(u32 value) {
+  early_print(S("0x"));
+  for (int i = 28; i >= 0; i -= 4) {
+    u8 digit = (value >> i) & 0xF;
+    if (digit < 10) {
+      early_print_char('0' + digit);
+    } else {
+      early_print_char('A' + digit - 10);
+    }
+  }
+}
+
+void early_print_addr(vptr addr) {
+  early_print_hex_32((u32)addr);
+}
+
+static void next_line() {
   yPos++;
   xPos = 0;
   if (yPos >= MAX_Y) {
@@ -62,7 +100,7 @@ static void scroll(int lines) {
   // Don't currently support negative scrolling
 }
 
-static void setCursor(u8 x, u8 y) {
+static void set_cursor(u8 x, u8 y) {
   u16 pos = y * MAX_X + x;
   outb(0x3D4, 14);
   outb(0x3D5, (u8)(pos >> 8));

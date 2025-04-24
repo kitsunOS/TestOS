@@ -20,11 +20,4 @@ rellocate:
   or eax, 0x80000000
   mov cr0, eax
 
-  mov cl, 'P'
-  mov [0xB8000], cl
-
   jmp higher_half_entry
-
-  hlt
-  jmp $
-  
