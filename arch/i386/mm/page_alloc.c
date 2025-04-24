@@ -1,20 +1,20 @@
 #include <types.h>
 #include <multiboot2.h>
 #include <mem.h>
+#include <mm/pagestrap.h>
+#include <mm/mb2_mm.h>
 #include "pages.h"
-#include "pagestrap.h"
 #include "page_alloc.h"
-#include "mb2_mm.h"
 
 #define PAGE_TABLE_SIZE (sizeof(page_table_entry_fourkb_t) * 1024)
 #define PAGE_DIR_SIZE (sizeof(page_directory_entry_pte_t) * 1024)
 
 // TODO: C does not like extern void
 extern multiboot2_header_t _multiboot2_info;
-extern void __phys_kernel_start;
-extern void __phys_kernel_end;
-extern void __virt_kernel_start;
-extern void __virt_kernel_end;
+extern u8 __phys_kernel_start[];
+extern u8 __phys_kernel_end[];
+extern u8 __virt_kernel_start[];
+extern u8 __virt_kernel_end[];
 
 static page_alloc_manager_t os_page_alloc_manager = {0};
 static page_directory_entry_pte_t os_page_directory[1024] __attribute__((aligned(4096))) = {0};
@@ -36,7 +36,7 @@ bool pam_init_os() {
   os_page_alloc_manager.virt_pagestrap = &os_virt_pagestrap;
   os_page_alloc_manager.page_directory = os_page_directory;
   os_page_alloc_manager.page_table = os_page_table;
-  os_page_alloc_manager.phys_addr = ((vptr) os_page_directory) - &__virt_kernel_start + &__phys_kernel_start;
+  os_page_alloc_manager.phys_addr = ((u8*) os_page_directory) - __virt_kernel_start + __phys_kernel_start;
 
   pagestrap_init(&os_phys_pagestrap, &os_pagestrap_alloc, os_allocate_page);
   pagestrap_init(&os_virt_pagestrap, &os_pagestrap_alloc, os_allocate_page);
@@ -92,7 +92,7 @@ void pam_enable_page_alloc_manager(page_alloc_manager_t* alloc_manager) {
 // TODO: Is this the proper file for this?
 bool pam_remove_bootstrap_regions(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
   if (remove_shared_regions(pagestrap, start_addr, end_addr)) return true;
-  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) &__phys_kernel_start, (vptr) &__phys_kernel_end)) return true;
+  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) __phys_kernel_start, (vptr) __phys_kernel_end)) return true;
 
   return false;
 }
@@ -117,7 +117,7 @@ static bool remove_shared_regions(pagestrap_t* pagestrap, vptr start_addr, vptr 
 
 static bool remove_virtual_regions(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
   if (remove_shared_regions(pagestrap, start_addr, end_addr)) return true;
-  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) &__virt_kernel_start, (vptr) &__virt_kernel_end)) return true;
+  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) __virt_kernel_start, (vptr) __virt_kernel_end)) return true;
   return false;
 }
 
@@ -156,14 +156,14 @@ static void ident_map_region(page_alloc_manager_t* manager, vptr start_addr, vpt
 static void map_higher_half(page_alloc_manager_t* manager) {
   page_directory_entry_pte_t* page_directory = manager->page_directory;
   page_table_entry_fourkb_t* page_table = manager->page_table;
-  u32 kernel_start = (u32) &__phys_kernel_start;
-  u32 kernel_end = (u32) &__phys_kernel_end;
+  u32 kernel_start = (u32) __phys_kernel_start;
+  u32 kernel_end = (u32) __phys_kernel_end;
   u32 kernel_size = kernel_end - kernel_start;
   for (u32 i = 0; i < kernel_size; i += _PS_PAGE_SIZE) {
-    u32 directory_index = ((u32) &__virt_kernel_start + i) >> 22;
+    u32 directory_index = ((u32) __virt_kernel_start + i) >> 22;
     page_directory[directory_index].in_memory = 1;
     page_directory[directory_index].enable_write = 1;
-    u32 page_index = ((u32) &__virt_kernel_start + i) >> 12;
+    u32 page_index = ((u32) __virt_kernel_start + i) >> 12;
     page_table[page_index].in_memory = 1;
     page_table[page_index].enable_write = 1;
     page_table[page_index].physical_reference = (kernel_start + i) >> 12;

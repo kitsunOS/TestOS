@@ -1,7 +1,7 @@
 #include <types.h>
-#include "early_print.h"
+#include <early_print.h>
 #include "self_tests.h"
-#include "pagestrap_tests.h"
+#include "mm/pagestrap_tests.h"
 
 bool st_run_self_tests() {
   if (st_run_pagestrap_tests()) return true;

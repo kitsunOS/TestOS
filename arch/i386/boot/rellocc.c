@@ -1,7 +1,7 @@
 #include <types.h>
-#include "../pages.h"
+#include "../mm/pages.h"
 
-extern vptr KERNEL_ADDRESS;
+extern vptr __virt_kernel_start;
 extern vptr __phys_kernel_start;
 extern vptr __phys_kernel_end;
 
@@ -37,7 +37,7 @@ static void map_higher_half() {
   u32 kernel_size = kernel_end - kernel_start;
 
   for (u32 i = 0; i < kernel_size; i += 4096) {
-    u32 page_index = ((u32) &KERNEL_ADDRESS + i) >> 12;
+    u32 page_index = ((u32) &__virt_kernel_start + i) >> 12;
     relloc_page_table[page_index].in_memory = 1;
     relloc_page_table[page_index].enable_write = 1;
     relloc_page_table[page_index].physical_reference = (kernel_start + i) >> 12;

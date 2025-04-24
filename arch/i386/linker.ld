@@ -10,31 +10,32 @@ SECTIONS {
     *(.text.multiboot)
     *(.text.boot)
   }
-  .rodata.boot : {
+  .rodata.boot ALIGN(8) : {
     *(.rodata.boot)
   }
-  .data.boot : {
+  .data.boot ALIGN(8) : {
     *(.data.boot)
   }
-  .bss.boot : {
+  .bss.boot ALIGN(8) : {
     *(.bss.boot)
   }
+  . = ALIGN(4096);
   __boot_end = .;
 
   . = KERNEL_ADDRESS;
   __phys_kernel_start = __boot_end;
   __virt_kernel_start = KERNEL_ADDRESS;
-  .text : AT(__boot_end) {
+  .text ALIGN(8) : AT(__boot_end) {
     *(.text)
   }
-  .rodata : AT(__boot_end + ADDR(.rodata) - KERNEL_ADDRESS) {
+  .rodata ALIGN(8) : AT(__boot_end + ADDR(.rodata) - KERNEL_ADDRESS) {
     *(.rodata)
   }
-  .data : AT(__boot_end + ADDR(.data) - KERNEL_ADDRESS) {
+  .data ALIGN(8) : AT(__boot_end + ADDR(.data) - KERNEL_ADDRESS) {
     *(.data)
     *(COMMON)
   }
-  .bss : AT(__boot_end + ADDR(.bss) - KERNEL_ADDRESS) {
+  .bss ALIGN(8) : AT(__boot_end + ADDR(.bss) - KERNEL_ADDRESS) {
     *(.bss)
   }
   __virt_kernel_end = .;

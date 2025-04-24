@@ -1,11 +1,10 @@
 #include "early_print.h"
 
 #include <types.h>
-#include <page_alloc.h>
-#include "mem.h"
+#include "mm/page_alloc.h"
 
 #ifdef DEBUG
-#include "self_tests.h"
+#include <selftest/self_tests.h>
 #endif
 
 u8 stack_end[4096] __attribute__((aligned(4096))) = {0};

@@ -1,10 +1,7 @@
-// TODO: Make sure the logical-physical mapping is correct for internal pointers
-// TODO: Move to mm
 
 #include <types.h>
-#include <pagestrap.h>
+#include "pagestrap.h"
 
-static vptr allocate_page(pagestrap_t* pagestrap, uX num_subsequent);
 static pageref_t* obtain_pageref(pagestrap_t* pagestrap);
 static uX pageref_end(pagestrap_t* pagestrap, pageref_t* page_ref);
 

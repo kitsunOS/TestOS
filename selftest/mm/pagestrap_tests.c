@@ -1,6 +1,6 @@
 #include <types.h>
-#include "self_tests.h"
-#include "pagestrap.h"
+#include <selftest/self_tests.h>
+#include <mm/pagestrap.h>
 
 bool st_run_pagestrap_tests() {
   pagestrap_t pagestrap;

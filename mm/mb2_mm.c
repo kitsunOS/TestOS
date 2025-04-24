@@ -1,9 +1,7 @@
-// TODO: Move to arch mm
-
 #include <multiboot2.h>
 #include <types.h>
-#include <pagestrap.h>
 #include <mem.h>
+#include "pagestrap.h"
 
 extern multiboot2_header_t* _multiboot2_info;
 

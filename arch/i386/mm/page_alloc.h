@@ -1,8 +1,8 @@
 #ifndef __I386_PAGE_ALLOC_H__
 #define __I386_PAGE_ALLOC_H__
 #include <types.h>
+#include <mm/pagestrap.h>
 #include "pages.h"
-#include "pagestrap.h"
 
 typedef struct page_alloc_manager_t {
   pagestrap_t* phys_pagestrap;
