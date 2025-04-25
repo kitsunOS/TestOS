@@ -25,6 +25,7 @@ typedef struct pagestrap_t {
   pageref_t used_page_refs_root;
   bool is_mid_alloc;
   vptr (*os_allocate_page) (void);
+  u16 unit_size;
 } pagestrap_t;
 
 void pagestrap_init(pagestrap_t* pagestrap, pagestrap_alloc_t* first_alloc, vptr (*os_allocate_page) (void));

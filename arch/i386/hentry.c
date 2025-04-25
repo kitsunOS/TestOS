@@ -1,6 +1,7 @@
 #include "early_print.h"
 
 #include <types.h>
+#include <mem.h>
 #include "mm/page_alloc.h"
 
 #ifdef DEBUG
@@ -9,6 +10,7 @@
 
 u8 stack_end[4096] __attribute__((aligned(4096))) = {0};
 
+static void ok(string_t str);
 static void reqok(bool condition, string_t ok_str, string_t fail_str);
 
 void higher_half_entry() {
@@ -22,6 +24,8 @@ void higher_half_entry() {
   #endif
 
   reqok(pam_init_os(), S("Page allocation manager initialized"), S("Failed to initialize page allocation manager"));
+  mem_init();
+  ok(S("Memory allocator initialized"));
 
   asm volatile(
     "cli\n\t"

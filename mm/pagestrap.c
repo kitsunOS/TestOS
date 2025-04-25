@@ -11,6 +11,7 @@ void pagestrap_init(pagestrap_t* pagestrap, pagestrap_alloc_t* first_alloc, vptr
   first_alloc->next_pointer = 0;
   pagestrap->is_mid_alloc = false;
   pagestrap->os_allocate_page = os_allocate_page;
+  pagestrap->unit_size = _PS_PAGE_SIZE;
   pagestrap->available_pages_root.num_subsequent = 0;
   pagestrap->available_pages_root.page_addr = 0;
   pagestrap->available_pages_root.next_page_ref = null;
@@ -119,7 +120,7 @@ vptr pagestrap_allocate_page(pagestrap_t* pagestrap, uX num_subsequent) {
     new_next_ref = obtain_pageref(pagestrap);
     if (new_next_ref == null) return null;
     new_next_ref->num_subsequent = page_ref->num_subsequent - num_subsequent;
-    new_next_ref->page_addr = page_ref->page_addr + num_subsequent * _PS_PAGE_SIZE;
+    new_next_ref->page_addr = page_ref->page_addr + num_subsequent * pagestrap->unit_size;
     new_next_ref->next_page_ref = page_ref->next_page_ref;
     page_ref->num_subsequent = num_subsequent;
   } else {
