@@ -3,6 +3,7 @@
 #include <types.h>
 #include <mem.h>
 #include "mm/page_alloc.h"
+#include "mm/gdt.h"
 
 #ifdef DEBUG
 #include <selftest/self_tests.h>
@@ -26,6 +27,9 @@ void higher_half_entry() {
   reqok(pam_init_os(), S("Page allocation manager initialized"), S("Failed to initialize page allocation manager"));
   mem_init();
   ok(S("Memory allocator initialized"));
+
+  gdt_init();
+  ok(S("Global Descriptor Table initialized"));
 
   asm volatile(
     "cli\n\t"
