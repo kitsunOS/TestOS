@@ -4,6 +4,8 @@
 #include <mem.h>
 #include "mm/page_alloc.h"
 #include "mm/gdt.h"
+#include "int/idt.h"
+#include "int/pic.h"
 
 #ifdef DEBUG
 #include <selftest/self_tests.h>
@@ -30,6 +32,14 @@ void higher_half_entry() {
 
   gdt_init();
   ok(S("Global Descriptor Table initialized"));
+
+  pic_init();
+  ok(S("Programmable Interrupt Controller initialized"));
+
+  idt_init();
+  ok(S("Interrupt Descriptor Table initialized"));
+
+  ok(S("-- System Up --"));
 
   asm volatile(
     "cli\n\t"

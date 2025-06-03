@@ -1,6 +1,7 @@
 file(GLOB ARCH_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 file(GLOB_RECURSE MM_SRC ${CMAKE_CURRENT_SOURCE_DIR}/mm/*.c)
-set (ARCH_SRC ${ARCH_SRC} ${MM_SRC})
+file(GLOB_RECURSE INT_SRC ${CMAKE_CURRENT_SOURCE_DIR}/int/*.c)
+set (ARCH_SRC ${ARCH_SRC} ${MM_SRC} ${INT_SRC})
 
 add_subdirectory(boot)
 
