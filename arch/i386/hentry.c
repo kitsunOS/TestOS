@@ -36,16 +36,23 @@ void higher_half_entry() {
   pic_init();
   ok(S("Programmable Interrupt Controller initialized"));
 
+  idt_preinit();
+  idt_populate();
   idt_init();
   ok(S("Interrupt Descriptor Table initialized"));
 
   ok(S("-- System Up --"));
 
+  
+
+  while (true) {
+    asm volatile("hlt");
+  }
+
   asm volatile(
     "cli\n\t"
     "hlt\n\t"
   );
-  while (true) {}
 }
 
 static void ok(string_t str) {

@@ -10,4 +10,6 @@ u16 inu16(u16 port);
 void outu32(u16 port, u32 value);
 u32 inu32(u16 port);
 
+void io_wait();
+
 #endif

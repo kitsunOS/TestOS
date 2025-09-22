@@ -13,4 +13,12 @@ add_library(arch_objs STATIC
   ${BOOT_PARTIAL_OBJ}
 )
 
+target_compile_options(arch_objs PRIVATE
+    -mgeneral-regs-only
+    -mno-red-zone
+    -ffreestanding
+    -fno-stack-protector
+    -fno-exceptions
+)
+
 add_dependencies(arch_objs boot_obj)

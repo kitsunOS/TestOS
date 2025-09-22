@@ -8,6 +8,7 @@ section .text
 global rellocate
 
 rellocate:
+  cli
   call setup_init_page_map
 
   mov eax, relloc_page_directory

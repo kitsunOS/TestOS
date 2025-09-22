@@ -82,7 +82,7 @@ add_custom_target(iso ALL DEPENDS ${ISO_FILE})
 add_custom_target(run
   COMMAND qemu-system-${TARGET_ARCH}
     -cdrom ${ISO_FILE}
-    -boot d -m 512M -smp 4 -enable-kvm
+    -boot d -m 512M -smp 1 -enable-kvm
     -d cpu_reset,unimp,int,guest_errors
     -monitor stdio
     -gdb tcp::6666
