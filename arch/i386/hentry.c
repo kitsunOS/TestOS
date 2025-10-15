@@ -1,7 +1,6 @@
-#include "early_print.h"
-
+#include <arch/early_print.h>
 #include <types.h>
-#include <mem.h>
+#include <mm/mem.h>
 #include "mm/page_alloc.h"
 #include "mm/gdt.h"
 #include "int/idt.h"
@@ -41,9 +40,7 @@ void higher_half_entry() {
   idt_init();
   ok(S("Interrupt Descriptor Table initialized"));
 
-  ok(S("-- System Up --"));
-
-  
+  ok(S("-- System Up --"));  
 
   while (true) {
     asm volatile("hlt");

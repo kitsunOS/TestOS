@@ -1,5 +1,5 @@
 #include <types.h>
-#include <early_print.h>
+#include <arch/early_print.h>
 #include "self_tests.h"
 #include "mm/pagestrap_tests.h"
 

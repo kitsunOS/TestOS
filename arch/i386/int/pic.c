@@ -1,5 +1,5 @@
 #include "pic.h"
-#include "../kio.h"
+#include <arch/kio.h>
 #include <types.h>
 
 #define PIC1_COMMAND 0x20
@@ -28,7 +28,6 @@ void pic_init() {
     outu8(PIC2_DATA, 0);
 
     while (inu8(0x64) & 0x01) {
-        // If so, read from the data port to clear it
         inu8(0x60);
     }
 }

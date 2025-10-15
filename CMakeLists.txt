@@ -35,7 +35,7 @@ set(OUTPUT_DIR ${CMAKE_BINARY_DIR}/out)
 set(KERNEL_ELF ${OUTPUT_DIR}/kernel.elf)
 set(ISO_FILE ${OUTPUT_DIR}/testos.iso)
 
-include_directories(include ${CMAKE_SOURCE_DIR}  ${CMAKE_SOURCE_DIR})
+include_directories(include kernel/include ${CMAKE_SOURCE_DIR})
 file(MAKE_DIRECTORY ${OUTPUT_DIR})
 
 add_subdirectory(arch)

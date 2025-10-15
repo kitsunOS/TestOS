@@ -1,10 +1,10 @@
 #include <types.h>
+#include <arch/early_print.h>
+#include <arch/kio.h>
 #include "idt.h"
 
 // Example stuff
 #include "pic.h"
-#include "early_print.h"
-#include "../kio.h"
 
 idt_entry_t idt[256];
 idt_descriptor_t idt_descriptor = {

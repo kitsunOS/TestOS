@@ -1,7 +1,7 @@
-#include <multiboot2.h>
+#include <boot/multiboot2.h>
+#include <mm/mem.h>
+#include <mm/pagestrap.h>
 #include <types.h>
-#include <mem.h>
-#include "pagestrap.h"
 
 extern multiboot2_header_t* _multiboot2_info;
 

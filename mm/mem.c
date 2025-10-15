@@ -1,6 +1,6 @@
 #include <types.h>
-#include <mem.h>
-#include "pagestrap.h"
+#include <mm/mem.h>
+#include <mm/pagestrap.h>
 
 #define NUM_PAGES_SPARE 20
 

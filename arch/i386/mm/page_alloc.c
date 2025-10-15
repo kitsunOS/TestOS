@@ -1,6 +1,6 @@
 #include <types.h>
-#include <multiboot2.h>
-#include <mem.h>
+#include <boot/multiboot2.h>
+#include <mm/mem.h>
 #include <mm/pagestrap.h>
 #include <mm/mb2_mm.h>
 #include "pages.h"

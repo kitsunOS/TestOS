@@ -1,4 +1,4 @@
-#include "kio.h"
+#include <arch/kio.h>
 #include <types.h>
 
 void outu8(u16 port, u8 value) {

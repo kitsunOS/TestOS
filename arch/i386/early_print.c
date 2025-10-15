@@ -1,4 +1,4 @@
-#include <early_print.h>
+#include <arch/early_print.h>
 #include <types.h>
 
 static const u8 MAX_X = 80, MAX_Y = 25;
