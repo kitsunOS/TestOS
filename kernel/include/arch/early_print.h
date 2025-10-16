@@ -23,7 +23,6 @@
 void early_print_init();
 void early_print_set_color(u8 fg, u8 bg);
 void early_print_reset_color();
-void early_print_finish();
 void early_print_char(u8 c);
 void early_print(string_t str);
 void early_println(string_t str);

@@ -32,8 +32,6 @@ void early_print_finish() {
   if (xPos != 0) {
     next_line();
   }
-
-  set_cursor(xPos, yPos);
 }
 
 void early_print_char(u8 c) {
@@ -47,6 +45,8 @@ void early_print_char(u8 c) {
     *cell = (color << 8) | c;
     xPos++;
   }
+
+  set_cursor(xPos, yPos);
 }
 
 void early_print(string_t str) {
@@ -56,6 +56,10 @@ void early_print(string_t str) {
 }
 
 void early_println(string_t str) {
+  if (str.size == 0) {
+    next_line();
+    return;
+  }
   early_print(str);
   early_print_finish();
 }
@@ -83,6 +87,8 @@ static void next_line() {
     scroll(yPos - MAX_Y + 1);
     yPos = MAX_Y - 1;
   }
+
+  set_cursor(xPos, yPos);
 }
 
 static void scroll(int lines) {

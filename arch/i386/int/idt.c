@@ -1,10 +1,13 @@
 #include <types.h>
 #include <arch/early_print.h>
 #include <arch/kio.h>
+#include <drivers/int.h>
 #include "idt.h"
 
 // Example stuff
 #include "pic.h"
+
+extern void* isr_stub_table[];
 
 idt_entry_t idt[256];
 idt_descriptor_t idt_descriptor = {
@@ -46,25 +49,45 @@ void idt_init() {
     asm volatile("sti");
 }
 
+// int
 
-// Some example stuff for now
-__attribute__((interrupt))
-void idt_on_timer(void* frame) {
-    pic_end_interrupt(0);
+irq_handler_t irq_handlers[15];
+
+bool int_register(u8 irq, irq_handler_t irq_handler) {
+    if (irq < 0 || irq > 15 || irq_handlers[irq] != null) {
+        return false;
+    }
+
+    irq_handlers[irq] = irq_handler;
+    return true;
 }
 
-__attribute__((interrupt))
-void idt_onkey(vptr frame) {
-    u8 scancode = inu8(0x60);
-    if (scancode == 0x9C) {
-        early_println(S(""));
-    } else {
-        early_print_char(scancode - 0x1E + 'a');
+bool int_unregister(u8 irq, irq_handler_t irq_handler) {
+    if (irq < 0 || irq > 15 || irq_handlers[irq] != irq_handler) {
+        return false;
     }
-    pic_end_interrupt(1);
+
+    irq_handlers[irq] = null;
+    return true;
+}
+
+extern void* idt_handle_irq(u8 irq) {
+    if (irq_handlers[irq] != null) {
+        irq_handlers[irq](irq);
+    }
+
+    pic_end_interrupt(irq);
+}
+
+// Some example stuff for now
+void idt_on_timer(u8 irq) {
+    
 }
 
 void idt_populate() {
-    idt_add_entry(0x20, idt_on_timer, 0xE);
-    idt_add_entry(0x21, idt_onkey, 0xE);
+    int_register(0, idt_on_timer);
+
+    for (int i = 0; i < 255; i++) {
+        idt_add_entry(i, isr_stub_table[i], 0xE);
+    }
 }

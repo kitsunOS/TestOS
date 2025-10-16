@@ -1,5 +1,7 @@
 #include <arch/early_print.h>
 #include <types.h>
+#include <drivers/driver.h>
+#include <drivers/keyboard/keyboard_driver.h> // TODO: This doesn't go here!
 #include <mm/mem.h>
 #include "mm/page_alloc.h"
 #include "mm/gdt.h"
@@ -9,6 +11,11 @@
 #ifdef DEBUG
 #include <selftest/self_tests.h>
 #endif
+
+driver_t* drivers[] = {
+  &keyboard_driver
+};
+u32 num_drivers = 1;
 
 u8 stack_end[4096] __attribute__((aligned(4096))) = {0};
 
@@ -34,6 +41,12 @@ void higher_half_entry() {
 
   pic_init();
   ok(S("Programmable Interrupt Controller initialized"));
+
+  for (int i = 0; i < num_drivers; i++) {
+    if (drivers[i] != null)
+      drivers[i] -> driver_init();
+  }
+  ok(S("Drivers initialized"));
 
   idt_preinit();
   idt_populate();
