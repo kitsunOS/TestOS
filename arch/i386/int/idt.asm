@@ -1,9 +1,19 @@
 global isr_stub_table
+
+extern except_handle_exception
 extern idt_handle_irq
 
+; TODO: Print stacktrace
 %macro ISR_EXCEPTION 1
   isr%1:
     cli
+    pusha
+    mov eax, [esp + 36]
+    push byte eax
+    push byte %1
+    call except_handle_exception
+    add esp, 2
+    popa
     add esp, 4
     iret
 %endmacro
@@ -11,6 +21,12 @@ extern idt_handle_irq
 %macro ISR_EXCEPTION_NOPARAM 1
   isr%1:
     cli
+    pusha
+    push byte 0
+    push byte %1
+    call except_handle_exception
+    add esp, 2
+    popa
     iret
 %endmacro
 
@@ -18,9 +34,9 @@ extern idt_handle_irq
   isr%1:
     cli
     pusha
-    push %2
+    push word %2
     call idt_handle_irq
-    add esp, 4
+    add esp, 2
     popa
     iret
 %endmacro

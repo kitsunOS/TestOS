@@ -1,5 +1,4 @@
 #include <types.h>
-#include <arch/early_print.h>
 #include <arch/kio.h>
 #include <drivers/int.h>
 #include "idt.h"

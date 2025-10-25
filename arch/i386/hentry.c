@@ -53,7 +53,7 @@ void higher_half_entry() {
   idt_init();
   ok(S("Interrupt Descriptor Table initialized"));
 
-  ok(S("-- System Up --"));  
+  ok(S("-- System Up --"));
 
   while (true) {
     asm volatile("hlt");
