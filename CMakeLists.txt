@@ -11,7 +11,7 @@ set(CMAKE_AR ${TARGET_ARCH}-elf-ar)
 set(CMAKE_RANLIB ${TARGET_ARCH}-elf-ranlib)
 set(CMAKE_LINKER ${TARGET_ARCH}-elf-ld)
 
-set(CMAKE_C_FLAGS "-m32 -ffreestanding -nostdlib" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS "-m32 -ffreestanding -nostdlib -Wextra" CACHE STRING "" FORCE)
 set(CMAKE_ASM_NASM_FLAGS "-felf32" CACHE STRING "" FORCE)
 
 set(NASM_FLAGS "-felf32")
@@ -19,10 +19,9 @@ set(CMAKE_ASM_NASM_OBJECT_FORMAT elf32)
 
 option(DEBUG "Enable debug flags" OFF)
 if(DEBUG)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g -DDEBUG")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -g -DDEBUG")
 else()
-    # TODO: Optimizations break the kernel
-    # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 endif()
 
 project(kernel LANGUAGES C ASM)

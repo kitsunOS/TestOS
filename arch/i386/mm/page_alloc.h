@@ -7,9 +7,10 @@
 typedef struct page_alloc_manager_t {
   pagestrap_t* phys_pagestrap;
   pagestrap_t* virt_pagestrap;
-  page_directory_entry_pte_t* page_directory;
-  page_table_entry_fourkb_t* page_table;
-  void* phys_addr;
+  volatile page_directory_entry_pte_t* page_directory;
+  volatile page_table_entry_fourkb_t* page_table;
+  void* directory_phys_addr;
+  void* table_phys_addr;
 } page_alloc_manager_t;
 
 bool pam_init_os();

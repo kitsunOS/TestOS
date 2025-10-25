@@ -53,7 +53,7 @@ void idt_init() {
 irq_handler_t irq_handlers[15];
 
 bool int_register(u8 irq, irq_handler_t irq_handler) {
-    if (irq < 0 || irq > 15 || irq_handlers[irq] != null) {
+    if (irq > 15 || irq_handlers[irq] != null) {
         return false;
     }
 
@@ -62,7 +62,7 @@ bool int_register(u8 irq, irq_handler_t irq_handler) {
 }
 
 bool int_unregister(u8 irq, irq_handler_t irq_handler) {
-    if (irq < 0 || irq > 15 || irq_handlers[irq] != irq_handler) {
+    if (irq > 15 || irq_handlers[irq] != irq_handler) {
         return false;
     }
 

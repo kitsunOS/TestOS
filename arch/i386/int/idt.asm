@@ -9,10 +9,10 @@ extern idt_handle_irq
     cli
     pusha
     mov eax, [esp + 36]
-    push byte eax
-    push byte %1
+    push eax
+    push %1
     call except_handle_exception
-    add esp, 2
+    add esp, 8
     popa
     add esp, 4
     iret
@@ -22,10 +22,10 @@ extern idt_handle_irq
   isr%1:
     cli
     pusha
-    push byte 0
-    push byte %1
+    push 0
+    push %1
     call except_handle_exception
-    add esp, 2
+    add esp, 8
     popa
     iret
 %endmacro
@@ -34,9 +34,9 @@ extern idt_handle_irq
   isr%1:
     cli
     pusha
-    push word %2
+    push %2
     call idt_handle_irq
-    add esp, 2
+    add esp, 4
     popa
     iret
 %endmacro

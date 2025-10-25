@@ -17,7 +17,7 @@ driver_t* drivers[] = {
 };
 u32 num_drivers = 1;
 
-u8 stack_end[4096] __attribute__((aligned(4096))) = {0};
+volatile u8 stack_end[4096] __attribute__((aligned(4096))) = {0};
 
 static void ok(string_t str);
 static void reqok(bool condition, string_t ok_str, string_t fail_str);
@@ -42,7 +42,7 @@ void higher_half_entry() {
   pic_init();
   ok(S("Programmable Interrupt Controller initialized"));
 
-  for (int i = 0; i < num_drivers; i++) {
+  for (u32 i = 0; i < num_drivers; i++) {
     if (drivers[i] != null)
       drivers[i] -> driver_init();
   }

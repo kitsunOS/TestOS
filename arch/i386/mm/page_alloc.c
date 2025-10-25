@@ -17,8 +17,8 @@ extern u8 __virt_kernel_start[];
 extern u8 __virt_kernel_end[];
 
 static page_alloc_manager_t os_page_alloc_manager = {0};
-static page_directory_entry_pte_t os_page_directory[1024] __attribute__((aligned(4096))) = {0};
-static page_table_entry_fourkb_t os_page_table[1024 * 1024] __attribute__((aligned(4096))) = {0};
+static volatile page_directory_entry_pte_t os_page_directory[1024] __attribute__((aligned(4096))) = {0};
+static volatile page_table_entry_fourkb_t os_page_table[1024 * 1024] __attribute__((aligned(4096))) = {0};
 static pagestrap_t os_phys_pagestrap = {0};
 static pagestrap_t os_virt_pagestrap = {0};
 static pagestrap_alloc_t os_pagestrap_alloc = {0};
@@ -36,7 +36,8 @@ bool pam_init_os() {
   os_page_alloc_manager.virt_pagestrap = &os_virt_pagestrap;
   os_page_alloc_manager.page_directory = os_page_directory;
   os_page_alloc_manager.page_table = os_page_table;
-  os_page_alloc_manager.phys_addr = ((u8*) os_page_directory) - __virt_kernel_start + __phys_kernel_start;
+  os_page_alloc_manager.directory_phys_addr = ((u8*) os_page_directory) - __virt_kernel_start + __phys_kernel_start;
+  os_page_alloc_manager.table_phys_addr = ((u8*) os_page_table) - __virt_kernel_start + __phys_kernel_start;
 
   pagestrap_init(&os_phys_pagestrap, &os_pagestrap_alloc, os_allocate_page);
   pagestrap_init(&os_virt_pagestrap, &os_pagestrap_alloc, os_allocate_page);
@@ -48,7 +49,7 @@ bool pam_init_os() {
   if (pagestrap_add_pages_se(&os_virt_pagestrap, (vptr) 0, (vptr) 0xFFFFFFFF)) return true;
   if (remove_virtual_regions(&os_virt_pagestrap, (vptr) 0, (vptr) 0xFFFFFFFF)) return true;
 
-  if (mb2_mm_setup(&os_phys_pagestrap)) return true;
+  //if (mb2_mm_setup(&os_phys_pagestrap)) return true;
 
   return false;
 }
@@ -85,7 +86,8 @@ void pam_enable_page_alloc_manager(page_alloc_manager_t* alloc_manager) {
     "andl $0xFFFFF000, %%eax\n\t"
     "movl %%eax, %%cr3"
     :
-    : "r" (alloc_manager->phys_addr)
+    : "r" (alloc_manager->directory_phys_addr)
+    : "%eax", "memory", "cc"
   );
 }
 
@@ -113,6 +115,8 @@ static bool remove_shared_regions(pagestrap_t* pagestrap, vptr start_addr, vptr 
   if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) &_multiboot2_info, multiboot2_end)) return true;
   if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) 0xB8000, (vptr) 0xB9000)) return true;
   if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) 0x0000, (vptr) 0x1000)) return true;
+
+  return false;
 }
 
 static bool remove_virtual_regions(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
@@ -122,12 +126,12 @@ static bool remove_virtual_regions(pagestrap_t* pagestrap, vptr start_addr, vptr
 }
 
 static void init_pages(page_alloc_manager_t* manager) {
-  page_directory_entry_pte_t* page_directory = manager->page_directory;
-  page_table_entry_fourkb_t* page_table = manager->page_table;
-  page_table_entry_fourkb_t* phys_addr = manager->phys_addr;
+  volatile page_directory_entry_pte_t* page_directory = manager->page_directory;
+  volatile page_table_entry_fourkb_t* page_table = manager->page_table;
+  page_table_entry_fourkb_t* table_phys_addr = manager->table_phys_addr;
   for (int i = 0; i < 1024; i++) {
     page_directory[i].in_memory = 0;
-    page_directory[i].pte_reference = ((u32) phys_addr + PAGE_DIR_SIZE + PAGE_TABLE_SIZE * i) >> 12;
+    page_directory[i].pte_reference = ((u32) table_phys_addr + PAGE_TABLE_SIZE * i) >> 12;
     for (int j = 0; j < 1024; j++) {
       int page_index = i * 1024 + j;
       page_table[page_index].in_memory = 0;
@@ -137,9 +141,8 @@ static void init_pages(page_alloc_manager_t* manager) {
 }
 
 static void ident_map_region(page_alloc_manager_t* manager, vptr start_addr, vptr end_addr) {
-  page_directory_entry_pte_t* page_directory = manager->page_directory;
-  page_table_entry_fourkb_t* page_table = manager->page_table;
-  page_table_entry_fourkb_t* phys_addr = manager->phys_addr;
+  volatile page_directory_entry_pte_t* page_directory = manager->page_directory;
+  volatile page_table_entry_fourkb_t* page_table = manager->page_table;
   u32 start = ((u32) start_addr) & ~0xFFF;
   u32 end = (((u32) end_addr) + 0xFFF) & ~0xFFF;
   for (u32 i = (u32) start; i < (u32) end; i += _PS_PAGE_SIZE) {
@@ -154,8 +157,8 @@ static void ident_map_region(page_alloc_manager_t* manager, vptr start_addr, vpt
 }
 
 static void map_higher_half(page_alloc_manager_t* manager) {
-  page_directory_entry_pte_t* page_directory = manager->page_directory;
-  page_table_entry_fourkb_t* page_table = manager->page_table;
+  volatile page_directory_entry_pte_t* page_directory = manager->page_directory;
+  volatile page_table_entry_fourkb_t* page_table = manager->page_table;
   u32 kernel_start = (u32) __phys_kernel_start;
   u32 kernel_end = (u32) __phys_kernel_end;
   u32 kernel_size = kernel_end - kernel_start;
