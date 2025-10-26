@@ -3,6 +3,7 @@
 #include <drivers/driver.h>
 #include <drivers/keyboard/keyboard_driver.h> // TODO: This doesn't go here!
 #include <mm/mem.h>
+#include <rescue/shell.h>
 #include "mm/page_alloc.h"
 #include "mm/gdt.h"
 #include "int/idt.h"
@@ -55,9 +56,7 @@ void higher_half_entry() {
 
   ok(S("-- System Up --"));
 
-  while (true) {
-    asm volatile("hlt");
-  }
+  rescue_shell_run();
 
   asm volatile(
     "cli\n\t"

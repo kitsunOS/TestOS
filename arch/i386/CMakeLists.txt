@@ -27,7 +27,5 @@ target_compile_options(arch_c_objs PRIVATE
 
 add_dependencies(arch_c_objs boot_obj)
 
-link_libraries(arch_c_objs)
-add_library(arch_objs STATIC ${INT_ASM_SRC})
-
-add_dependencies(arch_objs arch_c_objs)
+add_library(arch_objs OBJECT ${INT_ASM_SRC})
+target_link_libraries(arch_objs arch_c_objs)

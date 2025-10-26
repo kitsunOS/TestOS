@@ -43,21 +43,13 @@ add_subdirectory(selftest)
 add_subdirectory(drivers)
 add_subdirectory(kernel)
 
-add_executable(kernel.elf
-  $<TARGET_OBJECTS:arch_objs>
-  $<TARGET_OBJECTS:mm_objs>
-  $<TARGET_OBJECTS:selftest_objs>
-  $<TARGET_OBJECTS:keyboard_objs>
-  $<TARGET_OBJECTS:input_objs>
-  ${BOOT_PARTIAL_OBJ}
-)
-
+add_executable(kernel.elf ${BOOT_PARTIAL_OBJ})
 target_link_options(kernel.elf PRIVATE
   -T ${CMAKE_SOURCE_DIR}/arch/${TARGET_ARCH}/linker.ld
   -nostdlib
 )
 
-target_link_libraries(kernel.elf PRIVATE arch_objs mm_objs selftest_objs keyboard_objs input_objs)
+target_link_libraries(kernel.elf PRIVATE arch_objs mm_objs selftest_objs drivers_objs kernel_objs)
 
 add_custom_command(OUTPUT ${KERNEL_ELF}
   COMMAND cp kernel.elf ${KERNEL_ELF}
