@@ -1,5 +1,5 @@
-#ifndef __TYPES_H__
-#define __TYPES_H__
+#ifndef __LIB_TYPES_H__
+#define __LIB_TYPES_H__
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -15,12 +15,12 @@ typedef u8 bool;
 
 typedef void* vptr;
 
-typedef struct {
-  u32 size;
-  const u8* data;
-} string_t;
+typedef u8* string_t;
 
-#define S(x) ((string_t){sizeof(x) - 1, x})
+#define S(x) ((string_t)&(const struct { \
+  uX len; \
+  u8 data[sizeof(x) - 1]; \
+}){ sizeof(x) - 1, x })
 
 #define true 1
 #define false 0

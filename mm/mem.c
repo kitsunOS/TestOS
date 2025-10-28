@@ -30,6 +30,10 @@ vptr kmalloc(uX size) {
   return mem;
 }
 
+void kfree(vptr item) {
+  // TODO: Free me!
+}
+
 static vptr alloc_one_page() {
   return kalloc_pages(1);
 }

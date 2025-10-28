@@ -1,5 +1,5 @@
-#ifndef __INPUT_KEYS_H__
-#define __INPUT_KEYS_H__
+#ifndef __LIB_INPUT_KEYS_H__
+#define __LIB_INPUT_KEYS_H__
 
 #define KEYS_0 48
 #define KEYS_1 49

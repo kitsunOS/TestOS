@@ -49,7 +49,7 @@ bool pam_init_os() {
   if (pagestrap_add_pages_se(&os_virt_pagestrap, (vptr) 0, (vptr) 0xFFFFFFFF)) return true;
   if (remove_virtual_regions(&os_virt_pagestrap, (vptr) 0, (vptr) 0xFFFFFFFF)) return true;
 
-  //if (mb2_mm_setup(&os_phys_pagestrap)) return true;
+  if (mb2_mm_setup(&os_phys_pagestrap)) return true;
 
   return false;
 }

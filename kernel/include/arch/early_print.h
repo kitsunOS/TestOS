@@ -28,5 +28,6 @@ void early_print(string_t str);
 void early_println(string_t str);
 void early_print_hex_32(u32 value);
 void early_print_addr(vptr addr);
+void early_print_uX(uX value);
 
 #endif

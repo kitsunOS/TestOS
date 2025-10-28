@@ -1,5 +1,6 @@
 #include <arch/early_print.h>
 #include <types.h>
+#include <strings.h>
 
 static const u8 MAX_X = 80, MAX_Y = 25;
 static volatile u16* FRAMEBUFFER = (u16*)0xB8000;
@@ -50,13 +51,13 @@ void early_print_char(u8 c) {
 }
 
 void early_print(string_t str) {
-  for (u32 i = 0; i < str.size; i++) {
-    early_print_char(str.data[i]);
+  for (uX i = strstart(str); i < strend(str); i++) {
+    early_print_char(str[i]);
   }
 }
 
 void early_println(string_t str) {
-  if (str.size == 0) {
+  if (strlen(str) == 0) {
     next_line();
     return;
   }
@@ -78,6 +79,26 @@ void early_print_hex_32(u32 value) {
 
 void early_print_addr(vptr addr) {
   early_print_hex_32((u32)addr);
+}
+
+void early_print_uX(uX value) {
+  if (value == 0) {
+    early_print_char('0');
+    return;
+  }
+
+  uX divisor = 1;
+
+  while (value / divisor >= 10) {
+    divisor = divisor * 10;
+  }
+
+  while (divisor > 0) {
+    u8 digit = value / divisor;
+    early_print_char('0' + digit);
+    value = value % divisor;
+    divisor = divisor / 10;
+  }
 }
 
 static void next_line() {

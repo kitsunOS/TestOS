@@ -38,6 +38,7 @@ include_directories(include kernel/include ${CMAKE_SOURCE_DIR})
 file(MAKE_DIRECTORY ${OUTPUT_DIR})
 
 add_subdirectory(arch)
+add_subdirectory(lib)
 add_subdirectory(mm)
 add_subdirectory(selftest)
 add_subdirectory(drivers)
@@ -49,7 +50,7 @@ target_link_options(kernel.elf PRIVATE
   -nostdlib
 )
 
-target_link_libraries(kernel.elf PRIVATE arch_objs mm_objs selftest_objs drivers_objs kernel_objs)
+target_link_libraries(kernel.elf PRIVATE arch_objs lib_objs mm_objs selftest_objs drivers_objs kernel_objs)
 
 add_custom_command(OUTPUT ${KERNEL_ELF}
   COMMAND cp kernel.elf ${KERNEL_ELF}

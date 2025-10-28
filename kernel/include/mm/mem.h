@@ -4,6 +4,8 @@
 #include <mm/pagestrap.h>
 
 vptr kmalloc(uX size);
+void kfree(vptr item);
+
 vptr kalloc_pages(uX num_pages);
 bool pam_remove_bootstrap_regions(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr);
 void mem_init();

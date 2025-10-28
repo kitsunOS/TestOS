@@ -30,12 +30,16 @@ void higher_half_entry() {
 
   #ifdef DEBUG
   early_println(S("Debugging enabled, running self tests"));
-  reqok(st_run_self_tests(), S("All self tests passed"), S("Self tests failed"));
+  reqok(st_run_self_tests_early(), S("All early self tests passed"), S("Self tests failed"));
   #endif
 
-  reqok(pam_init_os(), S("Page allocation manager initialized"), S("Failed to initialize page allocation manager"));
+  reqok(pam_init_os(), S("Page Allocation Manager initialized"), S("Failed to initialize page allocation manager"));
   mem_init();
-  ok(S("Memory allocator initialized"));
+  ok(S("Memory Allocator initialized"));
+
+  #ifdef DEBUG
+  reqok(st_run_self_tests_late(), S("All late self tests passed"), S("Self tests failed"));
+  #endif
 
   gdt_init();
   ok(S("Global Descriptor Table initialized"));
