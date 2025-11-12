@@ -13,12 +13,12 @@ bool mb2_mm_setup(pagestrap_t* pagestrap) {
   while (tag->type != 0) {
     if (tag->type == 6) {
       multiboot2_memory_map_tag_t* mem_map = (multiboot2_memory_map_tag_t*) tag;
-      if (handle_mem_map(pagestrap, mem_map)) return true;
+      if (!handle_mem_map(pagestrap, mem_map)) return false;
     }
     tag = (multiboot2_tag_t*) (((u32) tag + tag->size + 7) & ~7);
   }
 
-  return false;
+  return true;
 }
 
 // TODO: A method to also release mb2 data when it's not needed?
@@ -30,11 +30,11 @@ static bool handle_mem_map(pagestrap_t* pagestrap, multiboot2_memory_map_tag_t* 
 
   for (u32 i = 0; i < num_entries; i++) {
     multiboot2_memory_map_entry_t* entry = (multiboot2_memory_map_entry_t*) entry_ptr;
-    if (handle_mem_map_entry(pagestrap, entry)) return true;
+    if (!handle_mem_map_entry(pagestrap, entry)) return false;
     entry_ptr += entry_size;
   }
 
-  return false;
+  return true;
 }
 
 static bool handle_mem_map_entry(pagestrap_t* pagestrap, multiboot2_memory_map_entry_t* entry) {
@@ -43,16 +43,16 @@ static bool handle_mem_map_entry(pagestrap_t* pagestrap, multiboot2_memory_map_e
     || entry->length_high != 0
     || entry->base_addr_low + entry->length_low < entry->base_addr_low
   ) {
-    return false; // Ignore until 64-bit support is added
+    return true; // Ignore until 64-bit support is added
   }
 
   u32 base_addr = entry->base_addr_low;
   u32 length = entry->length_low;
   
   if (entry->type == 1) {
-    if (pagestrap_add_pages_se(pagestrap, (vptr) base_addr, (vptr) base_addr + length)) return true;
-    if (pam_remove_bootstrap_regions(pagestrap, (vptr) base_addr, (vptr) base_addr + length)) return true;
+    if (!pagestrap_add_pages_se(pagestrap, (vptr) base_addr, (vptr) base_addr + length)) return false;
+    if (!pam_remove_bootstrap_regions(pagestrap, (vptr) base_addr, (vptr) base_addr + length)) return false;
   }
 
-  return false;
+  return true;
 }

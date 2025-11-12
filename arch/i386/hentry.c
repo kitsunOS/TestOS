@@ -3,6 +3,7 @@
 #include <drivers/driver.h>
 #include <drivers/keyboard/keyboard_driver.h> // TODO: This doesn't go here!
 #include <mm/mem.h>
+#include <vfs/vfs.h>
 #include <rescue/shell.h>
 #include "mm/page_alloc.h"
 #include "mm/gdt.h"
@@ -46,6 +47,8 @@ void higher_half_entry() {
 
   pic_init();
   ok(S("Programmable Interrupt Controller initialized"));
+
+  reqok(vfs_init(), S("Virtual Filesystem initialized"), S("Failed to initialize virtual filesystem"));
 
   for (u32 i = 0; i < num_drivers; i++) {
     if (drivers[i] != null)
@@ -95,7 +98,7 @@ static void hang() {
 }
 
 static void reqok(bool condition, string_t ok_str, string_t fail_str) {
-  if (condition) {
+  if (!condition) {
     fail(fail_str);
     hang();
   } else {

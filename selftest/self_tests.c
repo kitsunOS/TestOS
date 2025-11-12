@@ -6,20 +6,20 @@
 #include "lib/vector_tests.h"
 
 bool st_run_self_tests_early() {
-  if (st_run_pagestrap_tests()) return true;
+  if (!st_run_pagestrap_tests()) return false;
 
-  return false;
+  return true;
 }
 
 bool st_run_self_tests_late() {
-  if (st_run_vector_tests()) return true;
+  if (!st_run_vector_tests()) return false;
 
-  return false;
+  return true;
 }
 
 static bool st_show_pass(string_t pass_message) {
   if (strlen(pass_message) == 0) {
-    return false;
+    return true;
   }
 
   early_print_set_color(EP_GREEN, EP_BLACK);
@@ -27,7 +27,7 @@ static bool st_show_pass(string_t pass_message) {
   early_println(pass_message);
   early_print_reset_color();
 
-  return false;
+  return true;
 }
 
 bool st_assert_equals_vptr(vptr expected, vptr actual, string_t failMessage, string_t pass_message) {
@@ -41,7 +41,7 @@ bool st_assert_equals_vptr(vptr expected, vptr actual, string_t failMessage, str
     early_print_addr(actual);
     early_println(S(")"));
     early_print_reset_color();
-    return true;
+    return false;
   }
 
   return st_show_pass(pass_message);
@@ -58,7 +58,20 @@ bool st_assert_equals_uX(uX expected, uX actual, string_t failMessage, string_t 
     early_print_uX(actual);
     early_println(S(")"));
     early_print_reset_color();
-    return true;
+    return false;
+  }
+
+  return st_show_pass(pass_message);
+}
+
+bool st_assert_true(uX actual, string_t failMessage, string_t pass_message) {
+  if (!actual) {
+    early_print_set_color(EP_RED, EP_BLACK);
+    early_print(S("ST: "));
+    early_print(failMessage);
+    early_println(S(" (Expected: True, Actual: False)"));
+    early_print_reset_color();
+    return false;
   }
 
   return st_show_pass(pass_message);

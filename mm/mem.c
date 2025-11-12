@@ -21,7 +21,7 @@ vptr kmalloc(uX size) {
     uX num_pages = size / _PS_PAGE_SIZE + NUM_PAGES_SPARE;
     vptr page = kalloc_pages(num_pages);
     if (page == null) return null;
-    if (pagestrap_add_pages(&pagestrap, (uX) page, num_pages * _PS_PAGE_SIZE)) {
+    if (!pagestrap_add_pages(&pagestrap, (uX) page, num_pages * _PS_PAGE_SIZE)) {
       return null;
     }
     mem = pagestrap_allocate_page(&pagestrap, size);

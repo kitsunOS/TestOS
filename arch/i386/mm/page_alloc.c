@@ -46,12 +46,12 @@ bool pam_init_os() {
   map_os_regions();
   pam_enable_page_alloc_manager(&os_page_alloc_manager);
 
-  if (pagestrap_add_pages_se(&os_virt_pagestrap, (vptr) 0, (vptr) 0xFFFFFFFF)) return true;
-  if (remove_virtual_regions(&os_virt_pagestrap, (vptr) 0, (vptr) 0xFFFFFFFF)) return true;
+  if (!pagestrap_add_pages_se(&os_virt_pagestrap, (vptr) 0, (vptr) 0xFFFFFFFF)) return false;
+  if (!remove_virtual_regions(&os_virt_pagestrap, (vptr) 0, (vptr) 0xFFFFFFFF)) return false;
 
-  if (mb2_mm_setup(&os_phys_pagestrap)) return true;
+  if (!mb2_mm_setup(&os_phys_pagestrap)) return false;
 
-  return false;
+  return true;
 }
 
 // TODO: It would be nice if the page table entries weren't allocated until needed (and instead pointed to limited pte)
@@ -93,10 +93,10 @@ void pam_enable_page_alloc_manager(page_alloc_manager_t* alloc_manager) {
 
 // TODO: Is this the proper file for this?
 bool pam_remove_bootstrap_regions(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
-  if (remove_shared_regions(pagestrap, start_addr, end_addr)) return true;
-  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) __phys_kernel_start, (vptr) __phys_kernel_end)) return true;
+  if (!remove_shared_regions(pagestrap, start_addr, end_addr)) return false;
+  if (!remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) __phys_kernel_start, (vptr) __phys_kernel_end)) return false;
 
-  return false;
+  return true;
 }
 
 static vptr os_allocate_page() {
@@ -105,24 +105,24 @@ static vptr os_allocate_page() {
 
 static bool remove_bootstrap_region_if_overlap(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr, vptr region_start, vptr region_end) {
   if (ranges_overlap(start_addr, end_addr, region_start, region_end)) {
-    if (pagestrap_remove_pages_se(pagestrap, region_start, region_end)) return true;
+    if (!pagestrap_remove_pages_se(pagestrap, region_start, region_end)) return false;
   }
-  return false;
+  return true;
 }
 
 static bool remove_shared_regions(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
   vptr multiboot2_end = (vptr) &_multiboot2_info + _multiboot2_info.total_size;
-  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) &_multiboot2_info, multiboot2_end)) return true;
-  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) 0xB8000, (vptr) 0xB9000)) return true;
-  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) 0x0000, (vptr) 0x1000)) return true;
+  if (!remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) &_multiboot2_info, multiboot2_end)) return false;
+  if (!remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) 0xB8000, (vptr) 0xB9000)) return false;
+  if (!remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) 0x0000, (vptr) 0x1000)) return false;
 
-  return false;
+  return true;
 }
 
 static bool remove_virtual_regions(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
-  if (remove_shared_regions(pagestrap, start_addr, end_addr)) return true;
-  if (remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) __virt_kernel_start, (vptr) __virt_kernel_end)) return true;
-  return false;
+  if (!remove_shared_regions(pagestrap, start_addr, end_addr)) return false;
+  if (!remove_bootstrap_region_if_overlap(pagestrap, start_addr, end_addr, (vptr) __virt_kernel_start, (vptr) __virt_kernel_end)) return false;
+  return true;
 }
 
 static void init_pages(page_alloc_manager_t* manager) {

@@ -27,7 +27,7 @@ void pagestrap_init(pagestrap_t* pagestrap, pagestrap_alloc_t* first_alloc, vptr
 
 bool pagestrap_add_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subsequent) {
   pageref_t* page_ref = obtain_pageref(pagestrap);
-  if (page_ref == null) return true;
+  if (page_ref == null) return false;
 
   pageref_t* prev_ref = &(pagestrap->available_pages_root);
   while (
@@ -42,7 +42,7 @@ bool pagestrap_add_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subsequen
   page_ref->next_page_ref = prev_ref->next_page_ref;
   prev_ref->next_page_ref = page_ref;
 
-  return false;
+  return true;
 }
 
 bool pagestrap_add_pages_se(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
@@ -60,7 +60,7 @@ bool pagestrap_remove_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subseq
     page_ref = page_ref->next_page_ref;
   }
 
-  if (page_ref == null) return false;
+  if (page_ref == null) return true;
   
   while (page_ref != null && page_ref->page_addr < end_addr) {
     pageref_t* next_ref = page_ref->next_page_ref;
@@ -84,7 +84,7 @@ bool pagestrap_remove_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subseq
     } else {
       // Subsection of pageref is consumed
       pageref_t* new_next_ref = obtain_pageref(pagestrap);
-      if (new_next_ref == null) return true;
+      if (new_next_ref == null) return false;
       new_next_ref->page_addr = end_addr;
       new_next_ref->num_subsequent = (page_end - end_addr) / _PS_PAGE_SIZE;
       new_next_ref->next_page_ref = next_ref;
@@ -98,7 +98,7 @@ bool pagestrap_remove_pages(pagestrap_t* pagestrap, uX start_addr, uX num_subseq
     page_ref = next_ref;
   }
 
-  return false;
+  return true;
 }
 
 bool pagestrap_remove_pages_se(pagestrap_t* pagestrap, vptr start_addr, vptr end_addr) {
@@ -137,18 +137,18 @@ vptr pagestrap_allocate_page(pagestrap_t* pagestrap, uX num_subsequent) {
 static bool refill_if_needed(pagestrap_t* pagestrap) {
   pagestrap_alloc_t* prev_alloc = pagestrap->next_alloc;
   if (prev_alloc->next_pointer == _PS_NUM_PAGES_PER_ALLOC && prev_alloc->next_alloc == null) {
-    return true;
+    return false;
   } else if (prev_alloc->next_pointer >= _PS_NUM_PAGES_PER_ALLOC - 5 && !pagestrap->is_mid_alloc) {
     pagestrap->is_mid_alloc = true;
     pagestrap_alloc_t* new_alloc = (pagestrap_alloc_t*) pagestrap->os_allocate_page();
     pagestrap->is_mid_alloc = false;
-    if (new_alloc == null) return true;
+    if (new_alloc == null) return false;
     prev_alloc->next_alloc = new_alloc;
     pagestrap->next_alloc = new_alloc;
     new_alloc->next_pointer = 0;
     new_alloc->next_alloc = null;
   }
-  return false;
+  return true;
 }
 
 static pageref_t* obtain_pageref(pagestrap_t* pagestrap) {
@@ -156,7 +156,7 @@ static pageref_t* obtain_pageref(pagestrap_t* pagestrap) {
   if (page_ref) {
     pagestrap->freelist_root.next_page_ref = page_ref->next_page_ref;
   } else {
-    if (refill_if_needed(pagestrap)) return null;
+    if (!refill_if_needed(pagestrap)) return null;
     page_ref = &(pagestrap->next_alloc)->page_refs[pagestrap->next_alloc->next_pointer++];
   }
   page_ref->next_page_ref = null;

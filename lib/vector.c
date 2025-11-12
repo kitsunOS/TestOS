@@ -7,6 +7,8 @@ bool vector_init(vector_t* vector, uX init_capacity, float grow_factor) {
   vector -> grow_factor = grow_factor;
   vector -> pointer = 0;
   vector -> items = kmalloc(sizeof(vptr) * init_capacity);
+
+  return vector->items != null;
 }
 
 sX vector_add(vector_t* vector, vptr item) {
