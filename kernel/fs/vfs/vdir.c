@@ -165,7 +165,7 @@ static s8 vdir_remove(uX node_id, string_t name) {
 
   // TODO: Should I make size return number of directory entries, to use that instead?
   vector_t file_list;
-  u8 status = vdir_list(node_id, &file_list);
+  s8 status = vdir_list(node_id, &file_list);
   if (status < 0) return status;
 
   if (vector_length(&file_list) != 0) {
@@ -189,7 +189,7 @@ static s8 vdir_mount(uX node_id, fs_dir_t* mount_dirtype, uX mount_node_id) {
   }
 
   vector_t file_list;
-  u8 status = vdir_list(node_id, &file_list);
+  s8 status = vdir_list(node_id, &file_list);
   if (status < 0) return status;
 
   if (vector_length(&file_list) != 0) {
