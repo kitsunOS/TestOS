@@ -43,6 +43,6 @@ vptr vector_get(vector_t* vector, uX index) {
   return vector -> items[index];
 }
 
-bool vector_free(vector_t* vector) {
+void vector_free(vector_t* vector) {
   kfree(vector -> items);
 }

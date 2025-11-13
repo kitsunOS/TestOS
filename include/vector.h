@@ -19,6 +19,6 @@ sX vector_length(vector_t* vector);
 
 vptr vector_get(vector_t* vector, uX index);
 
-bool vector_free(vector_t* vector);
+void vector_free(vector_t* vector);
 
 #endif

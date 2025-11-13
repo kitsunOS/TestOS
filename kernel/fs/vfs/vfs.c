@@ -1,8 +1,8 @@
-#include <vfs/vfs.h>
-#include <vfs/vdir.h>
+#include <fs/vfs/vfs.h>
+#include <fs/fsdir.h>
 
 bool vfs_init() {
-  if (!vfs_init_dir(&vfs_root_dir)) {
+  if (!vfs_init_dir(&vfs_dir)) {
     return false;
   }
 

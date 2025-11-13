@@ -3,7 +3,8 @@
 #include <drivers/driver.h>
 #include <drivers/keyboard/keyboard_driver.h> // TODO: This doesn't go here!
 #include <mm/mem.h>
-#include <vfs/vfs.h>
+#include <fs/fsdir.h>
+#include <fs/vfs/vfs.h>
 #include <rescue/shell.h>
 #include "mm/page_alloc.h"
 #include "mm/gdt.h"
