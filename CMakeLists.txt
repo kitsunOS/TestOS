@@ -34,6 +34,14 @@ set(OUTPUT_DIR ${CMAKE_BINARY_DIR}/out)
 set(KERNEL_ELF ${OUTPUT_DIR}/kernel.elf)
 set(ISO_FILE ${OUTPUT_DIR}/testos.iso)
 
+set(KERNEL_COMPILE_OPTIONS
+  -mgeneral-regs-only
+  -mno-red-zone
+  -ffreestanding
+  -fno-stack-protector
+  -fno-exceptions
+)
+
 include_directories(include kernel/include ${CMAKE_SOURCE_DIR})
 file(MAKE_DIRECTORY ${OUTPUT_DIR})
 

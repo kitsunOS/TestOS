@@ -7,10 +7,10 @@ typedef struct vector_t {
   vptr* items;
   sX capacity;
   sX pointer;
-  float grow_factor;
+  u8 grow_factor;
 } vector_t;
 
-bool vector_init(vector_t* vector, uX init_capacity, float grow_factor);
+bool vector_init(vector_t* vector, uX init_capacity, u8 grow_factor);
 
 // Realistically, reaching the top of sX already means we have problems, so the conversion from uX to sX does not matter as much.
 sX vector_add(vector_t* vector, vptr item);

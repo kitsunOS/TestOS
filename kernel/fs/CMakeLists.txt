@@ -1,7 +1,5 @@
-add_subdirectory(vfs)
+file(GLOB FS_SRC CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 
-add_library(fs_objs INTERFACE)
+add_library(fs_objs OBJECT ${FS_SRC})
 
-target_sources(fs_objs INTERFACE
-  $<TARGET_OBJECTS:vfs_objs>
-)
+target_compile_options(fs_objs PUBLIC ${KERNEL_COMPILE_OPTIONS})

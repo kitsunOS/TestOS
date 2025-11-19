@@ -7,10 +7,15 @@
                 "${workspaceFolder}/include"
             ],
             "defines": [],
-            "compilerPath": "/sbin/clang",
+            "compilerPath": "/sbin/g++",
+            "compilerArgs": [
+                "-ffreestanding",
+                "-nostdinc",
+                "-nostdinc++"
+            ],
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-clang-x64"
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

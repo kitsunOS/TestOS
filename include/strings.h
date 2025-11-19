@@ -9,4 +9,6 @@ uX strstart(string_t str);
 
 uX strend(string_t str);
 
+bool streq(string_t str1, string_t str2);
+
 #endif

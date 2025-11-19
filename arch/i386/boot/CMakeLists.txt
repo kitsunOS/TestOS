@@ -19,3 +19,5 @@ add_custom_target(boot_obj ALL DEPENDS boot_partial.o)
 set(BOOT_PARTIAL_OBJ ${CMAKE_CURRENT_BINARY_DIR}/boot_partial.o PARENT_SCOPE)
 
 target_include_directories(boot_partial.o PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_compile_options(boot_partial.o PUBLIC "$<$<COMPILE_LANGUAGE:C>:${KERNEL_COMPILE_OPTIONS}>")

@@ -1,3 +1,0 @@
-file(GLOB VFS_SRC CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
-
-add_library(vfs_objs OBJECT ${VFS_SRC})

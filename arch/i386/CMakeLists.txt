@@ -17,13 +17,7 @@ add_library(arch_c_objs STATIC
   ${BOOT_PARTIAL_OBJ}
 )
 
-target_compile_options(arch_c_objs PRIVATE
-  -mgeneral-regs-only
-  -mno-red-zone
-  -ffreestanding
-  -fno-stack-protector
-  -fno-exceptions
-)
+target_compile_options(arch_c_objs PRIVATE ${KERNEL_COMPILE_OPTIONS})
 
 add_dependencies(arch_c_objs boot_obj)
 

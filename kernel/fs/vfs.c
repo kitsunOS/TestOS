@@ -1,11 +1,18 @@
-#include <fs/vfs/vfs.h>
-#include <fs/fsdir.h>
+#include <fs/vfs.h>
+#include <fs/fsmod.h>
 
 #include <mm/mem.h>
 #include <memory.h>
 #include <vector.h>
 
-#include "vdir_int.h"
+typedef struct vfs_vdir_int_t {
+  vector_t node_list;
+  fs_module_t* mount_dirtype;
+  uX mount_node_id;
+  fs_module_t* backing_dirtype;
+  uX backing_node_id;
+  u16 ref_count;
+} vfs_vdir_int_t;
 
 static s8 vdir_type(uX node_id, u8* type);
 static s8 vdir_close(uX node_id);
@@ -15,41 +22,53 @@ static s8 vdir_open(uX node_id, uX* new_node_id, string_t name, u8 type, u8 mode
 static s8 vdir_list(uX node_id, vector_t* entry_list);
 static s8 vdir_exists(uX node_id, string_t name);
 static s8 vdir_remove(uX node_id, string_t name);
-static s8 vdir_mount(uX node_id, fs_dir_t* mount_dirtype, uX mount_node_id);
+static s8 vdir_mount(uX node_id, fs_module_t* mount_dirtype, uX mount_node_id);
 static s8 vdir_unmount(uX node_id);
 // static s8 vdir_link(uX node_id, uX link_node_id);
 
-static bool vfs_create_virt_dir_addr(vfs_vdir_int_t** node_addr);
+static bool vfs_create_dir_addr(vfs_vdir_int_t** node_addr);
 
-fs_dir_t vfs_dir;
+fs_module_t vfs_module;
 uX vfs_root_node;
 
-bool vfs_init_dir(fs_dir_t* vfs_dir) {
-  vfs_dir->type = vdir_type;
-  vfs_dir->close = vdir_close;
-  vfs_dir->size = vdir_size;
+bool vfs_init() {
+  if (!vfs_init_module(&vfs_module)) {
+    return false;
+  }
 
-  vfs_dir->open = vdir_open;
-  vfs_dir->list = vdir_list;
-  vfs_dir->exists = vdir_exists;
-  vfs_dir->remove = vdir_remove;
-  vfs_dir->mount = vdir_mount;
-  vfs_dir->unmount = vdir_unmount;
+  if (!vfs_create_dir(&vfs_root_node)) {
+    return false;
+  }
 
   return true;
 }
 
-bool vfs_create_virt_dir(uX* node_id) {
-  return vfs_create_virt_dir_addr((vfs_vdir_int_t**) node_id);
+bool vfs_init_module(fs_module_t* vfs_module) {
+  vfs_module->type = vdir_type;
+  vfs_module->close = vdir_close;
+  vfs_module->size = vdir_size;
+
+  vfs_module->open = vdir_open;
+  vfs_module->list = vdir_list;
+  vfs_module->exists = vdir_exists;
+  vfs_module->remove = vdir_remove;
+  vfs_module->mount = vdir_mount;
+  vfs_module->unmount = vdir_unmount;
+
+  return true;
 }
 
-static bool vfs_create_virt_dir_addr(vfs_vdir_int_t** node_addr) {
+bool vfs_create_dir(uX* node_id) {
+  return vfs_create_dir_addr((vfs_vdir_int_t**) node_id);
+}
+
+static bool vfs_create_dir_addr(vfs_vdir_int_t** node_addr) {
   vfs_vdir_int_t* node = kmalloc(sizeof(vfs_vdir_int_t));
   if (!node) return false;
 
   memfill(node, sizeof(vfs_vdir_int_t), 0);
 
-  if (!vector_init(&(node->node_list), 16, .5)) return false;
+  if (!vector_init(&(node->node_list), 16, 15)) return false;
 
   *node_addr = node;
   return true;
@@ -105,6 +124,7 @@ static s8 vdir_size(uX node_id, sX* size) {
 //
 
 static s8 vdir_open(uX node_id, uX* new_node_id, string_t name, u8 type, u8 mode) {
+  // TODO: Cache the handle
   vfs_vdir_int_t* node = (vfs_vdir_int_t*) node_id;
   if (
     (node->mount_dirtype == null || node->mount_node_id == 0)
@@ -113,7 +133,7 @@ static s8 vdir_open(uX node_id, uX* new_node_id, string_t name, u8 type, u8 mode
     return FS_ERR_NOT_MOUNTED;
   }
 
-  fs_dir_t* dirtype = node->mount_dirtype != null && node->mount_node_id != 0 ?
+  fs_module_t* dirtype = node->mount_dirtype != null && node->mount_node_id != 0 ?
     node->mount_dirtype : node->backing_dirtype;
 
   uX uw_node_id = node->mount_dirtype != null && node->mount_node_id != 0 ?
@@ -125,7 +145,7 @@ static s8 vdir_open(uX node_id, uX* new_node_id, string_t name, u8 type, u8 mode
 
   // TODO: Track the actual type for bookkeeping.
   vfs_vdir_int_t* new_node;
-  if (!vfs_create_virt_dir_addr(&new_node)) return FS_ERR_NO_MEM;
+  if (!vfs_create_dir_addr(&new_node)) return FS_ERR_NO_MEM;
 
   new_node->mount_dirtype = dirtype;
   new_node->mount_node_id = inner_node_id;
@@ -182,7 +202,7 @@ static s8 vdir_remove(uX node_id, string_t name) {
   return FS_ERR_NOT_EXISTS;
 }
 
-static s8 vdir_mount(uX node_id, fs_dir_t* mount_dirtype, uX mount_node_id) {
+static s8 vdir_mount(uX node_id, fs_module_t* mount_dirtype, uX mount_node_id) {
   vfs_vdir_int_t* node = (vfs_vdir_int_t*) node_id;
   if (node->mount_dirtype != null && node->mount_node_id != 0) {
     return FS_ERR_ALREADY_MOUNTED;

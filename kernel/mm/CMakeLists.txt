@@ -4,3 +4,5 @@ file(GLOB MM_SRC CONFIGURE_DEPENDS
 )
 
 add_library(mm_objs OBJECT ${MM_SRC})
+
+target_compile_options(mm_objs PUBLIC ${KERNEL_COMPILE_OPTIONS})

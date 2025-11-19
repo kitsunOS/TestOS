@@ -3,9 +3,10 @@
 #include <drivers/driver.h>
 #include <drivers/keyboard/keyboard_driver.h> // TODO: This doesn't go here!
 #include <mm/mem.h>
-#include <fs/fsdir.h>
-#include <fs/vfs/vfs.h>
+#include <fs/fsmounts.h>
 #include <rescue/shell.h>
+#include <strings.h>
+
 #include "mm/page_alloc.h"
 #include "mm/gdt.h"
 #include "int/idt.h"
@@ -24,6 +25,8 @@ volatile u8 stack_end[4096] __attribute__((aligned(4096))) = {0};
 
 static void ok(string_t str);
 static void reqok(bool condition, string_t ok_str, string_t fail_str);
+
+void test_fs();
 
 void higher_half_entry() {
   early_print_init();
@@ -49,7 +52,7 @@ void higher_half_entry() {
   pic_init();
   ok(S("Programmable Interrupt Controller initialized"));
 
-  reqok(vfs_init(), S("Virtual Filesystem initialized"), S("Failed to initialize virtual filesystem"));
+  fsmounts_init(reqok);
 
   for (u32 i = 0; i < num_drivers; i++) {
     if (drivers[i] != null)
@@ -102,7 +105,7 @@ static void reqok(bool condition, string_t ok_str, string_t fail_str) {
   if (!condition) {
     fail(fail_str);
     hang();
-  } else {
+  } else if (strlen(ok_str) != 0) {
     ok(ok_str);
   }
 }

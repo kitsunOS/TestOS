@@ -2,7 +2,8 @@
 
 #include <mm/mem.h>
 
-bool vector_init(vector_t* vector, uX init_capacity, float grow_factor) {
+// Grow factor has one decimal point
+bool vector_init(vector_t* vector, uX init_capacity, u8 grow_factor) {
   vector -> capacity = init_capacity;
   vector -> grow_factor = grow_factor;
   vector -> pointer = 0;
@@ -13,7 +14,7 @@ bool vector_init(vector_t* vector, uX init_capacity, float grow_factor) {
 
 sX vector_add(vector_t* vector, vptr item) {
   if (vector -> pointer == vector -> capacity) {
-    uX new_capacity = vector -> capacity * vector -> grow_factor;
+    uX new_capacity = vector -> capacity * vector -> grow_factor / 10;
     vptr* new_items = kmalloc(sizeof(vptr) * new_capacity);
     if (new_items == null) return -1; // TODO: Consistent error codes
     

@@ -8,7 +8,6 @@ add_library(kernel_objs INTERFACE)
 target_sources(kernel_objs INTERFACE
   $<TARGET_OBJECTS:input_objs>
   $<TARGET_OBJECTS:rescue_objs>
+  $<TARGET_OBJECTS:fs_objs>
   $<TARGET_OBJECTS:mm_objs>
 )
-
-target_link_libraries(kernel_objs INTERFACE fs_objs)
