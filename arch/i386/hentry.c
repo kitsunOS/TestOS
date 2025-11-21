@@ -5,6 +5,7 @@
 #include <mm/mem.h>
 #include <fs/fsmounts.h>
 #include <rescue/shell.h>
+#include <input/input.h>
 #include <strings.h>
 
 #include "mm/page_alloc.h"
@@ -53,6 +54,8 @@ void higher_half_entry() {
   ok(S("Programmable Interrupt Controller initialized"));
 
   fsmounts_init(reqok);
+
+  reqok(input_init(), S("Input System initialized"), S("Failed to initialize input system"));
 
   for (u32 i = 0; i < num_drivers; i++) {
     if (drivers[i] != null)

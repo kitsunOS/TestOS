@@ -26,6 +26,9 @@ static s8 vdir_mount(uX node_id, fs_module_t* mount_dirtype, uX mount_node_id);
 static s8 vdir_unmount(uX node_id);
 // static s8 vdir_link(uX node_id, uX link_node_id);
 
+static sX vfile_read(uX node_id, u8* buffer, u16 size);
+static s8 vfile_write(uX node_id, u8* buffer, u16 size);
+
 static bool vfs_create_dir_addr(vfs_vdir_int_t** node_addr);
 
 fs_module_t vfs_module;
@@ -54,6 +57,9 @@ bool vfs_init_module(fs_module_t* vfs_module) {
   vfs_module->remove = vdir_remove;
   vfs_module->mount = vdir_mount;
   vfs_module->unmount = vdir_unmount;
+
+  vfs_module->read = vfile_read;
+  vfs_module->write = vfile_write;
 
   return true;
 }
@@ -233,4 +239,28 @@ static s8 vdir_unmount(uX node_id) {
   // TODO: Close it too?
 
   return true;
+}
+
+static sX vfile_read(uX node_id, u8* buffer, u16 size) {
+  vfs_vdir_int_t* node = (vfs_vdir_int_t*) node_id;
+  if (node->mount_dirtype != null && node->mount_node_id != 0) {
+    return node->mount_dirtype->read(node->mount_node_id, buffer, size);
+  }
+  if (node->backing_dirtype != null && node->backing_node_id != 0) {
+    return node->backing_dirtype->read(node->backing_node_id, buffer, size);
+  }
+  
+  return FS_ERR_NOT_MOUNTED;
+}
+
+static s8 vfile_write(uX node_id, u8* buffer, u16 size) {
+  vfs_vdir_int_t* node = (vfs_vdir_int_t*) node_id;
+  if (node->mount_dirtype != null && node->mount_node_id != 0) {
+    return node->mount_dirtype->write(node->mount_node_id, buffer, size);
+  }
+  if (node->backing_dirtype != null && node->backing_node_id != 0) {
+    return node->backing_dirtype->write(node->backing_node_id, buffer, size);
+  }
+  
+  return FS_ERR_NOT_MOUNTED;
 }

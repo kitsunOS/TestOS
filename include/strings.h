@@ -3,11 +3,13 @@
 
 #include <types.h>
 
-uX strlen(string_t str);
+#define strlen(str) str.len
 
-uX strstart(string_t str);
+#define strstart(str) str.data
 
-uX strend(string_t str);
+#define strend(str) (str.data + str.len)
+
+#define strch(str, i) str.data[i]
 
 bool streq(string_t str1, string_t str2);
 

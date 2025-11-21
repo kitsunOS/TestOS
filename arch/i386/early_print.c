@@ -51,8 +51,8 @@ void early_print_char(u8 c) {
 }
 
 void early_print(string_t str) {
-  for (uX i = strstart(str); i < strend(str); i++) {
-    early_print_char(str[i]);
+  for (const u8* i = strstart(str); i < strend(str); i++) {
+    early_print_char(*i);
   }
 }
 

@@ -1,5 +1,11 @@
 {
     "files.associations": {
-        "keyboard_driver.h": "c"
+        "keyboard_driver.h": "c",
+        "input_events.h": "c",
+        "early_print.h": "c",
+        "input.h": "c",
+        "types.h": "c",
+        "fsmod.h": "c",
+        "devfs.h": "c"
     }
 }

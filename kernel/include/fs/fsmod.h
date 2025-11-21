@@ -42,9 +42,12 @@ typedef struct fs_module_t {
   s8 (*unmount) (uX node_id);
   // s8 (*link) (uX node_id, uX link_node_id);
 
+  // TODO: Add offset option
   sX (*read) (uX node_id, u8* buffer, u16 size);
-  sX (*write) (uX node_id, u8* buffer, u16 size);
+  s8 (*write) (uX node_id, u8* buffer, u16 size);
   s8 (*seek) (uX node_id, u8 mode, uX pos);
 } fs_module_t;
+
+#define fsmod_write(mod, node_id, str) mod->write(node_id, strstart(str), strlen(str))
 
 #endif

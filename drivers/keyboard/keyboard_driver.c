@@ -1,7 +1,7 @@
 #include <types.h>
 #include <drivers/int.h>
 #include <input/keys.h>
-#include <input/input_events.h>
+#include <input/input.h>
 #include <arch/early_print.h>
 #include <arch/kio.h>
 #include "keyboard_driver.h"
@@ -110,7 +110,7 @@ static void idt_onkey(u8 irq) {
   }
 
   if (keycode != 0) {
-    process_key_event(event_type, keycode, shiftActive ? upper_char1[scancode] : lower_char1[scancode]);
+    input_process_key_event(event_type, keycode, shiftActive ? upper_char1[scancode] : lower_char1[scancode]);
   }
 }
 
