@@ -6,6 +6,7 @@
         "input.h": "c",
         "types.h": "c",
         "fsmod.h": "c",
-        "devfs.h": "c"
+        "devfs.h": "c",
+        "tmpfs.h": "c"
     }
 }

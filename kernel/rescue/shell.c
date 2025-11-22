@@ -1,7 +1,7 @@
 #include <rescue/shell.h>
 #include <arch/early_print.h>
 #include <fs/vfs.h>
-#include <input/input.h>
+#include <input/keys.h>
 #include <types.h>
 
 static void print_shell_prompt() {
@@ -19,13 +19,12 @@ static void process_key_event(u8 event_type, u8 keycode, char charCode) {
 }
 
 static string_t read() {
-  /*uX devfs_node;
+  uX devfs_node;
   s8 result = vfs_module.open(vfs_root_node, &devfs_node, S("dev"), FS_NODE_DIRECTORY, FS_M_READ);
   if (result < 0) return NULL_STR;
-  early_print_hex_32(devfs_node);*/
 
   uX input_handle;
-  s8 result = vfs_module.open(vfs_root_node, &input_handle, S("input"), FS_NODE_FILE, FS_M_READ);
+  result = vfs_module.open(devfs_node, &input_handle, S("input"), FS_NODE_FILE, FS_M_READ);
   if (result < 0) return NULL_STR;
   
   bool done = false;

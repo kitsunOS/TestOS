@@ -4,7 +4,9 @@
 #include <mm/mem.h>
 #include <memory.h>
 #include <vector.h>
+#include <strings.h>
 
+// TODO: Also support files
 typedef struct vfs_vdir_int_t {
   vector_t node_list;
   fs_module_t* mount_dirtype;
@@ -12,6 +14,7 @@ typedef struct vfs_vdir_int_t {
   fs_module_t* backing_dirtype;
   uX backing_node_id;
   u16 ref_count;
+  string_t name;
 } vfs_vdir_int_t;
 
 static s8 vdir_type(uX node_id, u8* type);
@@ -129,8 +132,8 @@ static s8 vdir_size(uX node_id, sX* size) {
 
 //
 
+// TODO: Clean up, it is starting to become unwieldy...
 static s8 vdir_open(uX node_id, uX* new_node_id, string_t name, u8 type, u8 mode) {
-  // TODO: Cache the handle
   vfs_vdir_int_t* node = (vfs_vdir_int_t*) node_id;
   if (
     (node->mount_dirtype == null || node->mount_node_id == 0)
@@ -138,6 +141,23 @@ static s8 vdir_open(uX node_id, uX* new_node_id, string_t name, u8 type, u8 mode
   ) {
     return FS_ERR_NOT_MOUNTED;
   }
+
+  //
+
+  vfs_vdir_int_t* match_node;
+  for (sX i = 0; i < vector_length(&node->node_list); i++) {
+    match_node = vector_get(&node->node_list, i);
+    if (streq(match_node->name, name)) break;
+    match_node = null;
+  }
+
+  if (match_node != null) {
+    // TODO: Verify type
+    *new_node_id = (uX) match_node;
+    return true;
+  }
+
+  //
 
   fs_module_t* dirtype = node->mount_dirtype != null && node->mount_node_id != 0 ?
     node->mount_dirtype : node->backing_dirtype;
@@ -153,9 +173,11 @@ static s8 vdir_open(uX node_id, uX* new_node_id, string_t name, u8 type, u8 mode
   vfs_vdir_int_t* new_node;
   if (!vfs_create_dir_addr(&new_node)) return FS_ERR_NO_MEM;
 
-  new_node->mount_dirtype = dirtype;
-  new_node->mount_node_id = inner_node_id;
+  new_node->backing_dirtype = dirtype;
+  new_node->backing_node_id = inner_node_id;
+  new_node->name = name;
 
+  vector_add(&node->node_list, new_node);
   *new_node_id = (uX) new_node;
 
   return true;
@@ -197,6 +219,8 @@ static s8 vdir_remove(uX node_id, string_t name) {
   if (vector_length(&file_list) != 0) {
     return FS_ERR_NOT_EMPTY;
   }
+
+  // TODO: Remove cached entries
 
   if (node->mount_dirtype != null && node->mount_node_id != 0) {
     return node->mount_dirtype->remove(node->mount_node_id, name);

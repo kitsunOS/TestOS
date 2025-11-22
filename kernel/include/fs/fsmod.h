@@ -11,9 +11,12 @@
 
 #define FS_M_READ 0x01
 #define FS_M_WRITE 0x02
-#define FS_M_EXECUTE 0x04
-#define FS_M_CREATE 0x08
-#define FS_M_REPLACE 0x10
+#define FS_M_READWRITE 0x03
+
+#define FS_M_OPEN 0x00
+#define FS_M_CREATE 0x04
+#define FS_M_REPLACE 0x08
+#define FS_M_APPEND 0x0C
 
 #define FS_ERR_NOT_EXISTS -0x01
 #define FS_ERR_NO_MEM -0x02

@@ -260,7 +260,6 @@ static s8 dvfsd_unmount(uX node_id) {
 
 //
 
-// TODO: Determine how this interacts with string_t...
 sX dvfsf_read(uX node_id, u8* buffer, u16 size) {
   devfs_dvfsf_handle_t* handle = (devfs_dvfsf_handle_t*) node_id;
   if (handle->type != FS_NODE_HANDLE_CHAR) return FS_ERR_WRONG_TYPE;

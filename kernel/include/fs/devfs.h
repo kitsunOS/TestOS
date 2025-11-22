@@ -13,7 +13,7 @@ typedef struct devfs_charfile_t {
 
 bool devfs_init();
 
-bool devfs_init_module(fs_module_t* vfs_module);
+bool devfs_init_module(fs_module_t* devfs_module);
 
 bool devfs_create_dir(uX* node_id, string_t name);
 

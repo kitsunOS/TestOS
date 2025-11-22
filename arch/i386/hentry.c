@@ -25,7 +25,7 @@ u32 num_drivers = 1;
 volatile u8 stack_end[4096] __attribute__((aligned(4096))) = {0};
 
 static void ok(string_t str);
-static void reqok(bool condition, string_t ok_str, string_t fail_str);
+static void reqok(s8 condition, string_t ok_str, string_t fail_str);
 
 void test_fs();
 
@@ -33,6 +33,12 @@ void higher_half_entry() {
   early_print_init();
   early_println(S("TestOS"));
   early_println(S("Hello World from the higher half!"));
+
+  idt_preinit();
+  idt_populate();
+  idt_init();
+  asm volatile("cli"); // TODO: Neaten this up
+  ok(S("Interrupt Descriptor Table initialized"));
 
   #ifdef DEBUG
   early_println(S("Debugging enabled, running self tests"));
@@ -63,10 +69,7 @@ void higher_half_entry() {
   }
   ok(S("Drivers initialized"));
 
-  idt_preinit();
-  idt_populate();
-  idt_init();
-  ok(S("Interrupt Descriptor Table initialized"));
+  asm volatile("sti"); // See above TODO
 
   ok(S("-- System Up --"));
 
@@ -104,9 +107,15 @@ static void hang() {
   while (true);
 }
 
-static void reqok(bool condition, string_t ok_str, string_t fail_str) {
-  if (!condition) {
+static void reqok(s8 condition, string_t ok_str, string_t fail_str) {
+  if (condition < 1) {
     fail(fail_str);
+    if (condition < 0) {
+      early_print_set_color(EP_RED, EP_BLACK);
+      early_print(S("  Note: Included status code '"));
+      early_print_uX(-condition);
+      early_print(S("'"));
+    }
     hang();
   } else if (strlen(ok_str) != 0) {
     ok(ok_str);
