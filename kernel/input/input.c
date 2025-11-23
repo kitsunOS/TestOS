@@ -52,7 +52,7 @@ static s8 input_open(uX* new_node_id, u8 mode, vptr meta) {
 
 static sX input_read(uX node_id, u8* buffer, u16 size) {
   u32 read = 0;
-  while (read + EVENT_SIZE < size && read_index != write_index) {
+  while (read + EVENT_SIZE <= size && read_index != write_index) {
     for (int i = 0; i < EVENT_SIZE; i++) {
       buffer[read++] = event_buffer[read_index * EVENT_SIZE + i];
     }

@@ -1,6 +1,5 @@
 #include <types.h>
 #include <selftest/self_tests.h>
-#include <arch/early_print.h>
 #include <vector.h>
 
 bool st_run_vector_tests() {

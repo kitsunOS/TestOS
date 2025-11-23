@@ -25,6 +25,7 @@ u32 num_drivers = 1;
 volatile u8 stack_end[4096] __attribute__((aligned(4096))) = {0};
 
 static void ok(string_t str);
+static void fail(string_t str);
 static void reqok(s8 condition, string_t ok_str, string_t fail_str);
 
 void test_fs();
@@ -74,6 +75,8 @@ void higher_half_entry() {
   ok(S("-- System Up --"));
 
   rescue_shell_run();
+
+  fail(S("Primary task unexpectedly returned early"));
 
   asm volatile(
     "cli\n\t"

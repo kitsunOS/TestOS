@@ -30,4 +30,8 @@ void early_print_hex_32(u32 value);
 void early_print_addr(vptr addr);
 void early_print_uX(uX value);
 
+void early_print_getres(u8* resX, u8* resY);
+void early_print_getpos(u8* x, u8* y);
+void early_print_setpos(u8 x, u8 y);
+
 #endif

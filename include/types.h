@@ -21,7 +21,6 @@ typedef struct string_t {
 } string_t;
 
 #define S(x) ((string_t) { sizeof(x) - 1, (const u8*) x })
-#define S_BUFF(len, x) ((string_t) { len, x })
 #define NULL_STR (string_t) { 0, 0 }
 
 #define true 1

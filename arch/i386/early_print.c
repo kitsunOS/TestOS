@@ -101,6 +101,22 @@ void early_print_uX(uX value) {
   }
 }
 
+void early_print_getres(u8* resX, u8* resY) {
+  *resX = MAX_X;
+  *resY = MAX_Y;
+}
+
+void early_print_getpos(u8* x, u8* y) {
+  *x = xPos;
+  *y = yPos;
+}
+
+void early_print_setpos(u8 x, u8 y) {
+  xPos = x % MAX_X;
+  yPos = y % MAX_Y;
+  set_cursor(xPos, yPos);
+}
+
 static void next_line() {
   yPos++;
   xPos = 0;
