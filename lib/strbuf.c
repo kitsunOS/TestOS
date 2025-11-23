@@ -48,14 +48,14 @@ bool strbuf_append_char(string_buf_t* strbuf, u8 character) {
 void strbuf_splice(string_buf_t* strbuf, uX pos, uX skip) {
   if (pos >= strbuf->len || skip <= 0) return;
   if (pos + skip > strbuf->len) {
-    skip = strbuf->len - strbuf->len;
-  }
-
-  for (uX i = 0; i < skip; i++) {
-    strbuf->data[pos + i] = strbuf->data[pos + i + skip];
+    skip = strbuf->len - pos;
   }
 
   strbuf->len -= skip;
+
+  for (uX i = pos; i < strbuf->len; i++) {
+    strbuf->data[i] = strbuf->data[i + skip];
+  }
 }
 
 void strbuf_clear(string_buf_t* strbuf) {

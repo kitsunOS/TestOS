@@ -23,6 +23,12 @@ bool st_run_strbuf_tests() {
   if (!st_assert_equals_uX(30, strbuf.capacity, S("String Buffer Test \"Overflow\" (PT6) Failed"), S(""))) return false;
   if (!st_assert_equals_uX(30, strbuf.grow_factor, S("String Buffer Test \"Overflow\" (PT7) Failed"), S("String Buffer Test \"Overflow\" Passed"))) return false;
 
+  // Splice
+  strbuf_splice(&strbuf, 4, 1);
+  if (!st_assert_equals_str(S("HELLWORLD!"), SB2S(strbuf), S("String Buffer Test \"Splice\" (PT1) Failed"), S(""))) return false;
+  strbuf_splice(&strbuf, 6, 999);
+  if (!st_assert_equals_str(S("HELLWO"), SB2S(strbuf), S("String Buffer Test \"Splice\" (PT2) Failed"), S("String Buffer Test \"Splice\" Passed"))) return false;
+
   strbuf_free(&strbuf);
   
   return true; 

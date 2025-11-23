@@ -17,7 +17,7 @@ s8 rescutils_open_input(uX* input_handle) {
 }
 
 s8 rescutils_get_line(uX input_handle, string_buf_t* line) {
-  u8 character;
+  u8 character = 0;
 
   strbuf_clear(line);
   while (true) {
